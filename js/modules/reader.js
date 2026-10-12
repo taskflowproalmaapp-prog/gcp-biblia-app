@@ -158,26 +158,19 @@
 
     /* Cargar versículos desde la API de la Biblia */
     try {
-      /* Cargar versículos desde múltiples fuentes */
+      /* Cargar versículos desde la Biblia local RV1960 */
       let verses = [];
-      const apis = [
-        `https://bible-api.com/${encodeURIComponent(book.abbr)}+${state.chapter}?translation=rv1960`,
-        `https://bible-api.com/${encodeURIComponent(book.name)}+${state.chapter}?translation=rv1960`,
-      ];
-      
-      for (const url of apis) {
-        try {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 8000);
-          const resp = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeout);
-          if (!resp.ok) continue;
-          const data = await resp.json();
-          if (data.verses && data.verses.length > 0) {
-            verses = data.verses;
-            break;
-          }
-        } catch(e) { continue; }
+      try {
+        if (!window._BIBLE_DATA) {
+          const resp = await fetch('bible.json');
+          window._BIBLE_DATA = await resp.json();
+        }
+        const key = book.id + '-' + state.chapter;
+        const rawVerses = window._BIBLE_DATA[key] || [];
+        verses = rawVerses.map((text, i) => ({ verse: i + 1, text }));
+      } catch(e) {
+        console.error('Error cargando Biblia:', e);
+        verses = [];
       }
 
       const chapSelect = Array.from({length: book.chapters}, (_, i) => i + 1)
