@@ -19,29 +19,68 @@ exports.handler = async (event) => {
     const { prompt, maxTokens = 800 } = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
-        })
-      }
-    );
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'API key no configurada' })
+      };
+    }
 
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Intentar con gemini-1.5-flash primero (más compatible con nivel gratuito)
+    const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro'];
+    let lastError = null;
+
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                maxOutputTokens: maxTokens,
+                temperature: 0.7
+              }
+            })
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.error) {
+          lastError = data.error.message;
+          continue;
+        }
+
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (!text) {
+          lastError = 'Respuesta vacía del modelo';
+          continue;
+        }
+
+        return {
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify({ text, model })
+        };
+      } catch(e) {
+        lastError = e.message;
+        continue;
+      }
+    }
 
     return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ text })
+      statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: lastError || 'Error desconocido' })
     };
+
   } catch (e) {
     return {
       statusCode: 500,
