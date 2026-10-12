@@ -156,6 +156,12 @@ Responde SOLO con este JSON:
       <div class="kids-memory">
         <div class="kids-section-label">🌟 Versículo para memorizar</div>
         "${lesson.memoryVerse||''}"
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="audio-nav-btn" style="background:var(--gold);color:#0B0E14;border-color:var(--gold);font-weight:600;"
+          onclick="GCP.audio.speakText('${(lesson.story||'').replace(/'/g,"\'")} ${(lesson.meaning||'').replace(/'/g,"\'")} Versículo para memorizar: ${(lesson.memoryVerse||'').replace(/'/g,"\'")}','${topic.name}')">
+          🔊 Escuchar lección
+        </button>
       </div>`;
   }
 
