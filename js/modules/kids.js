@@ -157,10 +157,20 @@ Responde SOLO con este JSON:
         <div class="kids-section-label">🌟 Versículo para memorizar</div>
         "${lesson.memoryVerse||''}"
       </div>
-      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="audio-nav-btn" style="background:var(--gold);color:#0B0E14;border-color:var(--gold);font-weight:600;"
-          onclick="GCP.audio.speakText('${(lesson.story||'').replace(/'/g,"\'")} ${(lesson.meaning||'').replace(/'/g,"\'")} Versículo para memorizar: ${(lesson.memoryVerse||'').replace(/'/g,"\'")}','${topic.name}')">
-          🔊 Escuchar lección
+      <div style="margin-top:16px;">
+        <button style="background:var(--gold);color:#0B0E14;border:none;padding:12px 24px;
+          border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;width:100%;"
+          onclick="GCP.speak.text(
+            'Historia de ${topic.name}. ' +
+            (lesson.story||'') + '. ' +
+            'Qué significa para mí. ' +
+            (lesson.meaning||'') + '. ' +
+            'Actividad de hoy. ' +
+            (lesson.activity||'') + '. ' +
+            'Versículo para memorizar. ' +
+            (lesson.memoryVerse||''),
+            '${topic.name}')">
+          🔊 Escuchar lección completa
         </button>
       </div>`;
   }
