@@ -181,10 +181,20 @@
 
       <div class="theme-actions">
         <button class="theme-btn theme-btn-primary" onclick="GCP.themes.shareTheme('${t.id}')">
-          📤 Compartir tema
+          📤 Compartir
         </button>
         <button class="theme-btn" onclick="GCP.themes.copyPrayer('${t.id}')">
           🙏 Copiar oración
+        </button>
+        <button class="theme-btn" onclick="GCP.speak.text(
+          '${t.name}. ' +
+          '${(t.explanation||'').replace(/'/g,"\'")}. ' +
+          'Versículos clave: ' +
+          '${((t.verses||[]).map(v=>v.ref+'. '+v.text).join('. ')).replace(/'/g,"\'")}. ' +
+          'Reflexión: ${(t.reflection||'').replace(/'/g,"\'")}. ' +
+          'Oración: ${(t.prayer||'').replace(/'/g,"\'")}',
+          '${t.name}')">
+          🔊 Escuchar
         </button>
       </div>`;
     content.scrollTop = 0;
