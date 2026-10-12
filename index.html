@@ -298,7 +298,7 @@
       function loadModule(name) {
         return new Promise((resolve, reject) => {
           const s = document.createElement('script');
-          s.src = 'js/modules/' + name + '.js?v=1';
+          s.src = 'js/modules/' + name + '.js?v=5&t=' + Date.now();
           s.onload = resolve;
           s.onerror = () => {
             console.warn('Módulo no encontrado:', name);
