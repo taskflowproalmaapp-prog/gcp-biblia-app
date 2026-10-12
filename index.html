@@ -100,9 +100,20 @@
     .music-btn.playing .music-bar span:nth-child(2){animation:bar .6s ease .2s infinite alternate;}
     .music-btn.playing .music-bar span:nth-child(3){animation:bar .9s ease .1s infinite alternate;}
     @keyframes bar{from{height:4px}to{height:14px}}
-    @media(max-width:600px){
+    .nav-hamburger{display:none;background:none;border:none;color:var(--gold);
+      font-size:22px;cursor:pointer;margin-left:auto;}
+    .nav-mobile{display:none;position:fixed;top:56px;left:0;right:0;z-index:99;
+      background:rgba(11,14,20,.98);backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(212,175,90,.15);padding:12px;}
+    .nav-mobile.open{display:flex;flex-direction:column;gap:4px;}
+    .nav-mobile button{background:none;border:none;color:var(--text2);padding:10px 16px;
+      border-radius:6px;cursor:pointer;font-size:14px;text-align:left;transition:all .15s;}
+    .nav-mobile button:hover{background:rgba(212,175,90,.1);color:var(--gold);}
+    .nav-mobile .nav-pro{background:var(--gold);color:#0B0E14;font-weight:600;}
+    @media(max-width:900px){
       .pricing-grid{grid-template-columns:1fr;}
       .nav-links{display:none;}
+      .nav-hamburger{display:block;}
     }
   </style>
 </head>
@@ -122,9 +133,25 @@
       <button onclick="GCP.router.go('search')">🔍 Buscar</button>
       <button onclick="GCP.router.go('themes')">💛 Temas</button>
       <button onclick="GCP.router.go('summaries')">📚 Resúmenes</button>
+      <button onclick="GCP.router.go('kids')">🧒 Niños</button>
+      <button onclick="GCP.router.go('projection')">📽️ Proyección</button>
+      <button onclick="GCP.router.go('voice')">🎤 Voz</button>
+      <button onclick="GCP.router.go('audio')">🔊 Audio</button>
       <button onclick="GCP.router.go('pro')" class="nav-pro">⭐ Pro</button>
     </div>
+    <button class="nav-hamburger" onclick="GCP.toggleMenu()">☰</button>
   </nav>
+  <div class="nav-mobile" id="nav-mobile">
+    <button onclick="GCP.router.go('reader');GCP.toggleMenu()">📖 Leer la Biblia</button>
+    <button onclick="GCP.router.go('search');GCP.toggleMenu()">🔍 Buscar Versículo</button>
+    <button onclick="GCP.router.go('themes');GCP.toggleMenu()">💛 Temas y Necesidades</button>
+    <button onclick="GCP.router.go('summaries');GCP.toggleMenu()">📚 Resúmenes IA</button>
+    <button onclick="GCP.router.go('kids');GCP.toggleMenu()">🧒 Niños</button>
+    <button onclick="GCP.router.go('projection');GCP.toggleMenu()">📽️ Proyección</button>
+    <button onclick="GCP.router.go('voice');GCP.toggleMenu()">🎤 Voz con IA</button>
+    <button onclick="GCP.router.go('audio');GCP.toggleMenu()">🔊 Audio Biblia</button>
+    <button class="nav-pro" onclick="GCP.router.go('pro');GCP.toggleMenu()">⭐ Pro</button>
+  </div>
 
   <main>
 
@@ -311,20 +338,17 @@
       }
     };
 
-    /* ── Claude AI helper ── */
+    /* ── Claude AI helper (via Netlify Function para evitar CORS) ── */
     GCP.ai = {
       async ask(prompt, maxTokens = 800) {
-        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        const resp = await fetch('/.netlify/functions/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-6',
-            max_tokens: maxTokens,
-            messages: [{ role: 'user', content: prompt }]
-          })
+          body: JSON.stringify({ prompt, maxTokens })
         });
         const data = await resp.json();
-        return data.content[0].text;
+        if (data.error) throw new Error(data.error);
+        return data.text;
       },
       async askJSON(prompt, maxTokens = 800) {
         const text = await GCP.ai.ask(prompt, maxTokens);
@@ -334,6 +358,12 @@
         get(k) { try { const v = localStorage.getItem('gcp_ai_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
         set(k, v) { try { localStorage.setItem('gcp_ai_'+k, JSON.stringify(v)); } catch(e) {} }
       }
+    };
+
+    /* ── Menú móvil ── */
+    GCP.toggleMenu = function() {
+      const m = document.getElementById('nav-mobile');
+      if (m) m.classList.toggle('open');
     };
 
     /* ── Toast notifications ── */
