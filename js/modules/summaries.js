@@ -197,8 +197,9 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.keyVerses.map(v=>`<div class="sum-verse"><div class="sum-verse-ref">${v.ref}</div><div class="sum-verse-text">"${v.text}"</div></div>`).join('')}</div>` : ''}
       ${deep.curiosities ? `<div class="sum-section"><div class="sum-section-label">💎 Datos curiosos</div>
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
-      <div style="margin-top:16px;display:flex;gap:10px;">
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
+        <button class="theme-btn" onclick="GCP.audio.speakText(document.getElementById('sum-main').innerText,'Resumen de ${book.name}')">🔊 Escuchar resumen</button>
       </div>`;
   }
 
