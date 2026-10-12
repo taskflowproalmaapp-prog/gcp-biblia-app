@@ -108,7 +108,7 @@
       </div>`;
     detail.scrollIntoView({behavior:'smooth'});
 
-    const cached = GCP.ai.cache.get('kids_' + id);
+    const cached = GCP.ai.cache.get('kids_v2_' + id);
     const lesson = cached || await GCP.ai.askJSON(
       `Eres un maestro bíblico para niños. Explica "${topic.name}" (${topic.ref}) de la Biblia RV1960
 de forma muy simple, divertida y apropiada para niños de ${topic.age} años.
@@ -119,7 +119,7 @@ Responde SOLO con este JSON:
 "activity":"una actividad simple que el niño puede hacer hoy",
 "memoryVerse":"versículo corto para memorizar con su referencia"}`, 800);
 
-    if (!cached && lesson) GCP.ai.cache.set('kids_' + id, lesson);
+    if (!cached && lesson) GCP.ai.cache.set('kids_v2_' + id, lesson);
 
     if (!lesson) {
       detail.innerHTML = '<p style="text-align:center;color:#e57373;padding:20px">Error al generar. Intenta de nuevo.</p>';
