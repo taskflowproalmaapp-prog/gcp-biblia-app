@@ -199,7 +199,16 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" onclick="GCP.audio.speakText(document.getElementById('sum-main').innerText,'Resumen de ${book.name}')">🔊 Escuchar resumen</button>
+        <button class="theme-btn" onclick="GCP.speak.text(
+          '${book.name}. ' +
+          (deep.whatHappens||'') + '. ' +
+          (deep.context||'') + '. ' +
+          (deep.godPurpose||'') + '. ' +
+          (deep.practicalLessons||'') + '. ' +
+          (deep.christConnection||''),
+          'Resumen de ${book.name}')">
+          🔊 Escuchar resumen
+        </button>
       </div>`;
   }
 
