@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Generación con Propósito — Biblia RV1960</title>
+  <meta name="description" content="Biblia Reina Valera 1960 con IA. Temas, resúmenes, profecías y más.">
+  <style>
+    :root {
+      --gold:#D4AF5A; --gold-light:#E8C97A;
+      --bg:#0B0E14; --surface:#131720; --ink:#1a1f2e;
+      --text:#F5F0E8; --text2:#8892a4;
+      --r:10px; --t:.18s ease;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;}
+
+    /* NAV */
+    .nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;
+      background:rgba(11,14,20,.95);backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(212,175,90,.15);
+      display:flex;align-items:center;padding:0 20px;gap:16px;}
+    .nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+    .nav-logo img{height:40px;width:auto;}
+    .nav-logo-text strong{display:block;font-size:14px;color:var(--gold);letter-spacing:.3px;}
+    .nav-logo-text span{font-size:10px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;}
+    .nav-links{display:flex;gap:2px;margin-left:auto;}
+    .nav-links button{background:none;border:none;color:var(--text2);padding:6px 12px;
+      border-radius:6px;cursor:pointer;font-size:13px;transition:all var(--t);}
+    .nav-links button:hover,.nav-links button.active{background:rgba(212,175,90,.1);color:var(--gold);}
+    .nav-pro{background:var(--gold)!important;color:#0B0E14!important;font-weight:600!important;margin-left:8px;}
+    .nav-pro:hover{background:var(--gold-light)!important;}
+
+    /* MAIN */
+    main{padding-top:56px;min-height:100vh;}
+    .page{display:none;}
+    .page.active{display:block;}
+
+    /* LOADING */
+    .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:16px;}
+    .spinner{width:40px;height:40px;border:3px solid rgba(212,175,90,.2);border-top-color:var(--gold);
+      border-radius:50%;animation:spin .8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* HERO */
+    .hero{min-height:calc(100vh - 56px);display:flex;flex-direction:column;
+      align-items:center;justify-content:center;text-align:center;padding:40px 20px;
+      background:radial-gradient(ellipse at 50% 30%,rgba(212,175,90,.08) 0%,transparent 70%);}
+    .hero-ornament{color:var(--gold);font-size:28px;margin-bottom:16px;}
+    .hero-title{font-size:clamp(32px,6vw,64px);font-family:Georgia,serif;line-height:1.1;margin-bottom:12px;}
+    .hero-title em{color:var(--gold);font-style:normal;}
+    .hero-year{font-size:18px;letter-spacing:8px;color:var(--text2);margin-bottom:20px;}
+    .hero-sub{color:var(--text2);max-width:500px;line-height:1.7;margin-bottom:40px;font-size:15px;}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+
+    /* BUTTONS */
+    .btn{padding:12px 24px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all var(--t);}
+    .btn-primary{background:var(--gold);color:#0B0E14;}
+    .btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
+    .btn-outline{background:transparent;color:var(--gold);border:1px solid rgba(212,175,90,.4);}
+    .btn-outline:hover{background:rgba(212,175,90,.1);}
+
+    /* FEATURES */
+    .features{padding:60px 20px;max-width:1100px;margin:0 auto;}
+    .section-title{text-align:center;color:var(--gold);font-size:13px;letter-spacing:2px;
+      text-transform:uppercase;margin-bottom:32px;}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;}
+    .feature-card{background:var(--surface);border:1px solid rgba(212,175,90,.1);
+      border-radius:var(--r);padding:20px;cursor:pointer;transition:all var(--t);}
+    .feature-card:hover{border-color:rgba(212,175,90,.35);transform:translateY(-2px);}
+    .feature-icon{font-size:28px;margin-bottom:10px;}
+    .feature-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+    .feature-desc{font-size:13px;color:var(--text2);line-height:1.5;}
+    .pro-badge{display:inline-block;background:var(--gold);color:#0B0E14;
+      font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-bottom:8px;}
+
+    /* PRICING */
+    .pricing{padding:60px 20px;max-width:800px;margin:0 auto;text-align:center;}
+    .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+    .price-card{background:var(--surface);border:1px solid rgba(212,175,90,.15);border-radius:var(--r);padding:28px 20px;}
+    .price-card.featured{border-color:var(--gold);background:rgba(212,175,90,.05);}
+    .price-name{font-size:18px;font-weight:600;margin-bottom:8px;}
+    .price-amount{font-size:36px;font-weight:700;color:var(--gold);}
+    .price-period{font-size:13px;color:var(--text2);margin-bottom:20px;}
+    .price-features{list-style:none;text-align:left;font-size:13px;color:var(--text2);line-height:2.2;}
+    .price-features li::before{content:'✓ ';color:var(--gold);}
+
+    @media(max-width:600px){
+      .pricing-grid{grid-template-columns:1fr;}
+      .nav-links{display:none;}
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-logo" onclick="GCP.router.go('home')">
+      <img id="nav-logo" src="assets/logo.png" alt="Generación con Propósito"
+           onerror="this.style.display='none'">
+      <div class="nav-logo-text">
+        <strong>Biblia Reina Valera</strong>
+        <span>1960 · Palabra de Dios</span>
+      </div>
+    </a>
+    <div class="nav-links">
+      <button onclick="GCP.router.go('reader')">📖 Leer</button>
+      <button onclick="GCP.router.go('search')">🔍 Buscar</button>
+      <button onclick="GCP.router.go('themes')">💛 Temas</button>
+      <button onclick="GCP.router.go('summaries')">📚 Resúmenes</button>
+      <button onclick="GCP.router.go('pro')" class="nav-pro">⭐ Pro</button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+      <section class="hero">
+        <div class="hero-ornament">✦</div>
+        <h1 class="hero-title"><em>Biblia</em><br>Reina Valera</h1>
+        <div class="hero-year">1 9 6 0</div>
+        <p class="hero-sub">La Palabra de Dios para estudiar, enseñar y compartir.<br>Con IA integrada para aprender más profundo.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="GCP.router.go('reader')">📖 Leer la Biblia</button>
+          <button class="btn btn-outline" onclick="GCP.router.go('search')">🔍 Buscar Versículo</button>
+          <button class="btn btn-outline" onclick="GCP.router.go('themes')">💛 Temas</button>
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="section-title">✦ Todo lo que encontrarás ✦</div>
+        <div class="features-grid">
+          <div class="feature-card" onclick="GCP.router.go('reader')">
+            <div class="feature-icon">📖</div>
+            <div class="feature-name">Biblia Completa</div>
+            <div class="feature-desc">66 libros del Antiguo y Nuevo Testamento RV1960. Gratis para siempre.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('search')">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-name">Búsqueda de Versículos</div>
+            <div class="feature-desc">Encuentra cualquier versículo por palabra o referencia exacta.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('themes')">
+            <div class="pro-badge">PRO</div>
+            <div class="feature-icon">💛</div>
+            <div class="feature-name">Temas y Necesidades</div>
+            <div class="feature-desc">116 temas: depresión, ansiedad, perdón, esperanza y más con oración.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('summaries')">
+            <div class="pro-badge">PRO · IA</div>
+            <div class="feature-icon">📚</div>
+            <div class="feature-name">Resúmenes con IA</div>
+            <div class="feature-desc">Análisis profundo de los 66 libros generado por Claude AI.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('kids')">
+            <div class="pro-badge">PRO · IA</div>
+            <div class="feature-icon">🧒</div>
+            <div class="feature-name">Estudio para Niños</div>
+            <div class="feature-desc">La Biblia explicada con lenguaje simple y divertido para los más pequeños.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('projection')">
+            <div class="pro-badge">PRO</div>
+            <div class="feature-icon">📽️</div>
+            <div class="feature-name">Proyección</div>
+            <div class="feature-desc">Proyecta versículos en pantalla completa para iglesias y grupos.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('voice')">
+            <div class="pro-badge">PRO · IA</div>
+            <div class="feature-icon">🎤</div>
+            <div class="feature-name">Voz con IA</div>
+            <div class="feature-desc">Habla y la IA busca versículos o responde tus preguntas bíblicas.</div>
+          </div>
+          <div class="feature-card" onclick="GCP.router.go('audio')">
+            <div class="pro-badge">PRO</div>
+            <div class="feature-icon">🔊</div>
+            <div class="feature-name">Audio Biblia</div>
+            <div class="feature-desc">Escucha la Biblia narrada. Ideal para invidentes y personas mayores.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pricing">
+        <div class="section-title">✦ Planes ✦</div>
+        <div class="pricing-grid">
+          <div class="price-card">
+            <div class="price-name">Free</div>
+            <div class="price-amount">$0</div>
+            <div class="price-period">Para siempre</div>
+            <ul class="price-features">
+              <li>Biblia RV1960 completa</li>
+              <li>Búsqueda de versículos</li>
+              <li>7 días Pro gratis</li>
+            </ul>
+            <button class="btn btn-outline" style="width:100%;margin-top:20px" onclick="GCP.router.go('reader')">Comenzar gratis</button>
+          </div>
+          <div class="price-card featured">
+            <div class="price-name">Pro</div>
+            <div class="price-amount">$2.99</div>
+            <div class="price-period">USD / mes · o $24.99/año</div>
+            <ul class="price-features">
+              <li>Todo lo de Free</li>
+              <li>116 Temas con oración</li>
+              <li>Resúmenes 66 libros IA</li>
+              <li>Estudio para niños IA</li>
+              <li>Proyección + Fondos</li>
+              <li>Voz con IA</li>
+              <li>Audio Biblia</li>
+              <li>Multiidioma</li>
+              <li>Compartir con imagen IA</li>
+            </ul>
+            <button class="btn btn-primary" style="width:100%;margin-top:20px" onclick="GCP.router.go('pro')">Probar 7 días gratis</button>
+          </div>
+        </div>
+        <p style="color:var(--text2);font-size:13px;">
+          Una obra para Dios · Con el excedente ayudamos a otros ministerios
+        </p>
+      </section>
+    </div>
+
+    <!-- MÓDULOS (cargan dinámicamente) -->
+    <div id="page-reader"     class="page"><div class="loading"><div class="spinner"></div><p>Cargando Biblia...</p></div></div>
+    <div id="page-search"     class="page"><div class="loading"><div class="spinner"></div><p>Cargando búsqueda...</p></div></div>
+    <div id="page-themes"     class="page"><div class="loading"><div class="spinner"></div><p>Cargando temas...</p></div></div>
+    <div id="page-summaries"  class="page"><div class="loading"><div class="spinner"></div><p>Cargando resúmenes...</p></div></div>
+    <div id="page-kids"       class="page"><div class="loading"><div class="spinner"></div><p>Cargando estudio infantil...</p></div></div>
+    <div id="page-projection" class="page"><div class="loading"><div class="spinner"></div><p>Cargando proyección...</p></div></div>
+    <div id="page-voice"      class="page"><div class="loading"><div class="spinner"></div><p>Cargando micrófono IA...</p></div></div>
+    <div id="page-audio"      class="page"><div class="loading"><div class="spinner"></div><p>Cargando audio Biblia...</p></div></div>
+    <div id="page-pro"        class="page"><div class="loading"><div class="spinner"></div><p>Cargando planes...</p></div></div>
+
+  </main>
+
+  <script>
+    /* ═══ GCP — Objeto global ═══ */
+    window.GCP = {};
+
+    /* ── Router: carga módulos bajo demanda ── */
+    GCP.router = (() => {
+      const loaded = new Set(['home']);
+      let current = 'home';
+
+      function go(name) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+        const page = document.getElementById('page-' + name);
+        if (page) page.classList.add('active');
+        window.scrollTo(0, 0);
+        current = name;
+
+        if (!loaded.has(name)) {
+          loaded.add(name);
+          loadModule(name);
+        }
+      }
+
+      function loadModule(name) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'js/modules/' + name + '.js?v=1';
+          s.onload = resolve;
+          s.onerror = () => {
+            console.warn('Módulo no encontrado:', name);
+            const page = document.getElementById('page-' + name);
+            if (page) page.innerHTML = '<div class="loading"><p style="color:var(--text2)">Módulo en construcción 🔨</p></div>';
+          };
+          document.head.appendChild(s);
+        });
+      }
+
+      return { go, loadModule, getCurrent: () => current };
+    })();
+
+    /* ── Storage simple ── */
+    GCP.storage = {
+      get(k) { try { return localStorage.getItem('gcp_'+k); } catch(e) { return null; } },
+      set(k, v) { try { localStorage.setItem('gcp_'+k, v); } catch(e) {} },
+      remove(k) { try { localStorage.removeItem('gcp_'+k); } catch(e) {} },
+    };
+
+    /* ── Auth / Plan ── */
+    GCP.auth = {
+      isPro() {
+        const plan = GCP.storage.get('plan');
+        const trial = GCP.storage.get('trial_end');
+        if (plan === 'pro') return true;
+        if (trial && Date.now() < parseInt(trial)) return true;
+        return false;
+      },
+      startTrial() {
+        const end = Date.now() + 7 * 24 * 60 * 60 * 1000;
+        GCP.storage.set('trial_end', end.toString());
+      },
+      requirePro(callback) {
+        if (GCP.auth.isPro()) { callback(); return; }
+        GCP.router.go('pro');
+      }
+    };
+
+    /* ── Claude AI helper ── */
+    GCP.ai = {
+      async ask(prompt, maxTokens = 800) {
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: maxTokens,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+        const data = await resp.json();
+        return data.content[0].text;
+      },
+      async askJSON(prompt, maxTokens = 800) {
+        const text = await GCP.ai.ask(prompt, maxTokens);
+        return JSON.parse(text.replace(/```json|```/g, '').trim());
+      },
+      cache: {
+        get(k) { try { const v = localStorage.getItem('gcp_ai_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
+        set(k, v) { try { localStorage.setItem('gcp_ai_'+k, JSON.stringify(v)); } catch(e) {} }
+      }
+    };
+
+    /* ── Toast notifications ── */
+    GCP.toast = (msg, type = 'info') => {
+      const t = document.createElement('div');
+      t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:${type==='error'?'#c62828':type==='success'?'#2e7d32':'#1a1f2e'};
+        color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;
+        border:1px solid rgba(212,175,90,.3);box-shadow:0 4px 20px rgba(0,0,0,.4);`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    };
+
+    /* ── Activar trial al primer acceso ── */
+    if (!GCP.storage.get('visited')) {
+      GCP.storage.set('visited', '1');
+      GCP.auth.startTrial();
+    }
+  </script>
+
+</body>
+</html>
