@@ -85,6 +85,21 @@
     .price-features{list-style:none;text-align:left;font-size:13px;color:var(--text2);line-height:2.2;}
     .price-features li::before{content:'✓ ';color:var(--gold);}
 
+
+    /* Música */
+    .music-btn{position:fixed;bottom:24px;right:24px;z-index:200;
+      background:rgba(11,14,20,.9);border:1px solid rgba(212,175,90,.3);
+      color:var(--gold);padding:10px 16px;border-radius:30px;cursor:pointer;
+      font-size:13px;font-weight:600;backdrop-filter:blur(8px);
+      display:flex;align-items:center;gap:8px;transition:all .2s;}
+    .music-btn:hover{border-color:var(--gold);background:rgba(212,175,90,.1);}
+    .music-btn.playing{border-color:var(--gold);background:rgba(212,175,90,.08);}
+    .music-bar{display:flex;gap:2px;align-items:flex-end;height:14px;}
+    .music-bar span{width:3px;background:var(--gold);border-radius:2px;animation:none;}
+    .music-btn.playing .music-bar span:nth-child(1){animation:bar .8s ease infinite alternate;}
+    .music-btn.playing .music-bar span:nth-child(2){animation:bar .6s ease .2s infinite alternate;}
+    .music-btn.playing .music-bar span:nth-child(3){animation:bar .9s ease .1s infinite alternate;}
+    @keyframes bar{from{height:4px}to{height:14px}}
     @media(max-width:600px){
       .pricing-grid{grid-template-columns:1fr;}
       .nav-links{display:none;}
@@ -340,5 +355,47 @@
     }
   </script>
 
+
+  <!-- Botón de música flotante -->
+  <button class="music-btn" id="music-btn" onclick="GCP.music.toggle()">
+    <div class="music-bar">
+      <span style="height:4px"></span>
+      <span style="height:8px"></span>
+      <span style="height:6px"></span>
+    </div>
+    <span id="music-label">🎹 Jeshua</span>
+  </button>
+
+  <audio id="music-audio" loop>
+    <source src="assets/jeshua.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    GCP.music = (() => {
+      const audio = document.getElementById('music-audio');
+      const btn   = document.getElementById('music-btn');
+      const label = document.getElementById('music-label');
+      let playing = false;
+
+      function toggle() {
+        if (playing) {
+          audio.pause();
+          btn.classList.remove('playing');
+          label.textContent = '🎹 Jeshua';
+          playing = false;
+        } else {
+          audio.volume = 0.35;
+          audio.play().then(() => {
+            btn.classList.add('playing');
+            label.textContent = '🎹 Pausar';
+            playing = true;
+          }).catch(() => GCP.toast('Toca de nuevo para activar la música'));
+        }
+        GCP.storage.set('music_on', playing ? '1' : '0');
+      }
+
+      return { toggle };
+    })();
+  </script>
 </body>
 </html>
