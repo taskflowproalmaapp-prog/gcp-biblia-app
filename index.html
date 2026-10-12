@@ -393,6 +393,94 @@
       setTimeout(() => t.remove(), 3000);
     };
 
+    /* ── Voz global — disponible en todos los módulos sin cargar audio.js ── */
+    GCP.speak = (() => {
+      let synth = window.speechSynthesis;
+      let voices = [];
+      let selectedVoice = null;
+      let isPaused = false;
+
+      // Cargar voces al inicio
+      function loadVoices() {
+        const all = synth.getVoices();
+        voices = all.filter(v => v.lang.startsWith('es') || v.lang.startsWith('ES'));
+        if (voices.length === 0) voices = all;
+        // Preferir voces femeninas y cálidas
+        const warm = ['female','mujer','helena','lucia','paulina','maria','sofia','carmen','sabina'];
+        voices.sort((a,b) => {
+          const aW = warm.some(k => a.name.toLowerCase().includes(k)) ? -1 : 1;
+          const bW = warm.some(k => b.name.toLowerCase().includes(k)) ? -1 : 1;
+          return aW - bW;
+        });
+        selectedVoice = voices[0] || null;
+      }
+      synth.onvoiceschanged = loadVoices;
+      setTimeout(loadVoices, 500);
+
+      // Botón flotante de control
+      let floatingBtn = null;
+      function showFloating(title) {
+        if (!floatingBtn) {
+          floatingBtn = document.createElement('div');
+          floatingBtn.style.cssText = `position:fixed;bottom:80px;right:24px;z-index:300;
+            background:rgba(11,14,20,.95);border:1px solid rgba(212,175,90,.4);
+            border-radius:30px;padding:10px 18px;display:flex;align-items:center;gap:10px;
+            color:#D4AF5A;font-size:13px;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);
+            box-shadow:0 4px 20px rgba(0,0,0,.4);`;
+          floatingBtn.onclick = () => GCP.speak.stop();
+          document.body.appendChild(floatingBtn);
+        }
+        floatingBtn.innerHTML = `
+          <div style="display:flex;gap:2px;align-items:flex-end;height:14px;">
+            <span style="width:3px;background:#D4AF5A;border-radius:2px;animation:bar .8s ease infinite alternate;height:14px"></span>
+            <span style="width:3px;background:#D4AF5A;border-radius:2px;animation:bar .6s ease .2s infinite alternate;height:8px"></span>
+            <span style="width:3px;background:#D4AF5A;border-radius:2px;animation:bar .9s ease .1s infinite alternate;height:11px"></span>
+          </div>
+          <span>🔊 ${title.slice(0,30)}${title.length>30?'...':''}</span>
+          <span style="opacity:.6;font-size:11px">✕ Detener</span>`;
+        floatingBtn.style.display = 'flex';
+      }
+
+      function hideFloating() {
+        if (floatingBtn) floatingBtn.style.display = 'none';
+      }
+
+      // Hablar un texto largo párrafo por párrafo
+      function text(txt, title) {
+        synth.cancel();
+        isPaused = false;
+        if (!txt) return;
+
+        showFloating(title || 'Leyendo...');
+        GCP.toast('🔊 Leyendo en voz alta...');
+
+        const u = new SpeechSynthesisUtterance(txt);
+        if (selectedVoice) u.voice = selectedVoice;
+        u.rate = 1.0;
+        u.pitch = 1.0;
+        u.lang = selectedVoice?.lang || 'es-ES';
+        u.onend = hideFloating;
+        u.onerror = hideFloating;
+        synth.speak(u);
+      }
+
+      function stop() {
+        synth.cancel();
+        isPaused = false;
+        hideFloating();
+      }
+
+      function pause() {
+        if (synth.speaking) { synth.pause(); isPaused = true; }
+      }
+
+      function resume() {
+        if (isPaused) { synth.resume(); isPaused = false; }
+      }
+
+      return { text, stop, pause, resume };
+    })();
+
     /* ── Activar trial al primer acceso ── */
     if (!GCP.storage.get('visited')) {
       GCP.storage.set('visited', '1');
