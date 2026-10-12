@@ -122,57 +122,106 @@ Responde SOLO con este JSON:
     if (!cached && lesson) GCP.ai.cache.set('kids_' + id, lesson);
 
     if (!lesson) {
-      detail.innerHTML = '<p style="text-align:center;color:#e57373;padding:20px">Error. Intenta de nuevo.</p>';
+      detail.innerHTML = '<p style="text-align:center;color:#e57373;padding:20px">Error al generar. Intenta de nuevo.</p>';
       return;
     }
 
+    const lessonText = [
+      'Hola amiguito. Hoy aprendemos sobre ' + topic.name + '. ',
+      lesson.story||'',
+      'Qué significa para mí. ' + (lesson.meaning||''),
+      'Así es Dios. ' + (lesson.godCharacter||''),
+      'Actividad de hoy. ' + (lesson.activity||''),
+      'Oración. ' + (lesson.prayer||''),
+      'Dato curioso. ' + (lesson.funFact||''),
+      'Versículo para memorizar. ' + (lesson.memoryVerse||'')
+    ].join('. ');
+
     detail.innerHTML = `
-      <button class="kids-back" onclick="document.getElementById('kids-detail').className='kids-detail'">← Volver</button>
+      <button class="kids-back" onclick="document.getElementById('kids-detail').className='kids-detail';GCP.speak.stop()">← Volver</button>
+
       <div class="kids-detail-header">
         <div class="kids-detail-icon">${topic.icon}</div>
         <div class="kids-detail-title">${topic.name}</div>
-        <div style="color:var(--text2);font-size:13px;margin-top:4px">${topic.ref}</div>
+        <div style="color:var(--text2);font-size:14px;margin-top:4px">${topic.ref} · Para niños de ${topic.age} años</div>
       </div>
+
+      <!-- BOTÓN AUDIO GRANDE Y PROMINENTE -->
+      <div style="background:linear-gradient(135deg,rgba(212,175,90,.15),rgba(212,175,90,.05));
+        border:2px solid rgba(212,175,90,.4);border-radius:14px;padding:20px;margin-bottom:24px;text-align:center;">
+        <div style="font-size:36px;margin-bottom:8px;">🎧</div>
+        <div style="color:var(--gold);font-weight:700;font-size:16px;margin-bottom:6px;">¡Escucha la lección completa!</div>
+        <div style="color:var(--text2);font-size:13px;margin-bottom:14px;">Ideal para que un adulto lea mientras el niño escucha</div>
+        <button onclick="GCP.speak.text(\`${lessonText.replace(/`/g,"'")}\`,'${topic.name}')"
+          style="background:var(--gold);color:#0B0E14;border:none;padding:14px 32px;
+          border-radius:10px;font-weight:700;cursor:pointer;font-size:16px;margin-right:10px;">
+          ▶ Escuchar ahora
+        </button>
+        <button onclick="GCP.speak.stop()"
+          style="background:rgba(212,175,90,.1);color:var(--gold);border:1px solid rgba(212,175,90,.3);
+          padding:14px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;">
+          ⏹ Detener
+        </button>
+      </div>
+
       <div class="kids-section">
         <div class="kids-section-label">📖 La Historia</div>
-        <p>${lesson.story||''}</p>
+        <p style="font-size:16px;line-height:1.9">${lesson.story||''}</p>
       </div>
+
       <div class="kids-section">
         <div class="kids-section-label">💡 ¿Qué significa para mí?</div>
-        <p>${lesson.meaning||''}</p>
+        <p style="font-size:15px;line-height:1.8">${lesson.meaning||''}</p>
       </div>
+
+      ${lesson.godCharacter ? `
+      <div class="kids-section">
+        <div class="kids-section-label">✨ Así es Dios</div>
+        <p style="font-size:15px;line-height:1.8">${lesson.godCharacter}</p>
+      </div>` : ''}
+
       <div class="kids-section">
         <div class="kids-section-label">🤔 Preguntas para pensar</div>
         ${(lesson.questions||[]).map((q,i)=>`
           <div class="kids-question">
             <div class="kids-question-num">${i+1}.</div>
-            <div class="kids-question-text">${q}</div>
+            <div class="kids-question-text" style="font-size:15px">${q}</div>
           </div>`).join('')}
       </div>
+
       <div class="kids-section">
         <div class="kids-section-label">🎨 Actividad de hoy</div>
-        <p>${lesson.activity||''}</p>
+        <p style="font-size:15px;line-height:1.8">${lesson.activity||''}</p>
       </div>
+
+      ${lesson.funFact ? `
+      <div style="background:rgba(212,175,90,.08);border-left:4px solid var(--gold);
+        border-radius:0 10px 10px 0;padding:16px;margin-bottom:16px;">
+        <div class="kids-section-label">🌟 ¿Sabías que...?</div>
+        <p style="color:var(--text);font-size:15px;line-height:1.7">${lesson.funFact}</p>
+      </div>` : ''}
+
       <div class="kids-memory">
-        <div class="kids-section-label">🌟 Versículo para memorizar</div>
-        "${lesson.memoryVerse||''}"
-      </div>
-      <div style="margin-top:16px;">
-        <button style="background:var(--gold);color:#0B0E14;border:none;padding:12px 24px;
-          border-radius:8px;font-weight:700;cursor:pointer;font-size:14px;width:100%;"
-          onclick="GCP.speak.text(
-            'Historia de ${topic.name}. ' +
-            (lesson.story||'') + '. ' +
-            'Qué significa para mí. ' +
-            (lesson.meaning||'') + '. ' +
-            'Actividad de hoy. ' +
-            (lesson.activity||'') + '. ' +
-            'Versículo para memorizar. ' +
-            (lesson.memoryVerse||''),
-            '${topic.name}')">
-          🔊 Escuchar lección completa
+        <div class="kids-section-label">📜 Versículo para memorizar</div>
+        <div style="font-size:18px;font-style:italic;line-height:1.6;margin:10px 0">"${lesson.memoryVerse||''}"</div>
+        <button onclick="GCP.speak.text('${(lesson.memoryVerse||'').replace(/'/g,"\'")}','Versículo')"
+          style="background:rgba(212,175,90,.15);border:1px solid rgba(212,175,90,.3);color:var(--gold);
+          padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;">
+          🔊 Escuchar versículo
         </button>
-      </div>`;
+      </div>
+
+      ${lesson.prayer ? `
+      <div style="background:rgba(100,150,255,.06);border:1px solid rgba(100,150,255,.2);
+        border-radius:12px;padding:20px;margin-top:16px;text-align:center;">
+        <div class="kids-section-label">🙏 Oremos juntos</div>
+        <p style="color:var(--text);font-size:16px;line-height:1.9;font-style:italic">${lesson.prayer}</p>
+        <button onclick="GCP.speak.text('${(lesson.prayer||'').replace(/'/g,"\'")}','Oración')"
+          style="background:rgba(212,175,90,.1);border:1px solid rgba(212,175,90,.3);color:var(--gold);
+          padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;">
+          🔊 Escuchar oración
+        </button>
+      </div>` : ''}`;
   }
 
   async function askCustom() {
