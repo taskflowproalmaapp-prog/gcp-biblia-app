@@ -338,21 +338,36 @@
       }
     };
 
-    /* ── Claude AI helper (via Netlify Function para evitar CORS) ── */
+    /* ── Gemini AI helper (via Netlify Function) ── */
     GCP.ai = {
       async ask(prompt, maxTokens = 800) {
-        const resp = await fetch('/.netlify/functions/ai', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt, maxTokens })
-        });
-        const data = await resp.json();
-        if (data.error) throw new Error(data.error);
-        return data.text;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 25000);
+        try {
+          const resp = await fetch('/.netlify/functions/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt, maxTokens }),
+            signal: controller.signal
+          });
+          clearTimeout(timeout);
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          const data = await resp.json();
+          if (data.error) throw new Error(data.error);
+          return data.text;
+        } catch(e) {
+          clearTimeout(timeout);
+          if (e.name === 'AbortError') throw new Error('Tiempo de espera agotado');
+          throw e;
+        }
       },
       async askJSON(prompt, maxTokens = 800) {
         const text = await GCP.ai.ask(prompt, maxTokens);
-        return JSON.parse(text.replace(/```json|```/g, '').trim());
+        const clean = text.replace(/```json|```/g, '').trim();
+        const start = clean.indexOf('{');
+        const end = clean.lastIndexOf('}');
+        if (start < 0 || end < 0) throw new Error('JSON inválido');
+        return JSON.parse(clean.substring(start, end + 1));
       },
       cache: {
         get(k) { try { const v = localStorage.getItem('gcp_ai_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
