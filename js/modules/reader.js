@@ -158,21 +158,26 @@
 
     /* Cargar versículos desde la API de la Biblia */
     try {
-      /* Intentar múltiples APIs de Biblia */
+      /* Cargar versículos desde múltiples fuentes */
       let verses = [];
-      try {
-        const resp = await fetch(`https://bible-api.com/${encodeURIComponent(book.name)}+${state.chapter}?translation=rv1960`);
-        const data = await resp.json();
-        verses = data.verses || [];
-      } catch(e1) {
+      const apis = [
+        `https://bible-api.com/${encodeURIComponent(book.abbr)}+${state.chapter}?translation=rv1960`,
+        `https://bible-api.com/${encodeURIComponent(book.name)}+${state.chapter}?translation=rv1960`,
+      ];
+      
+      for (const url of apis) {
         try {
-          /* API alternativa */
-          const resp2 = await fetch(`https://cdn.jsdelivr.net/gh/thiagobodruk/biblia@master/json/rv1960/${book.id}/${state.chapter}.json`);
-          const data2 = await resp2.json();
-          verses = data2.map((t,i) => ({verse:i+1, text:t}));
-        } catch(e2) {
-          verses = [];
-        }
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 8000);
+          const resp = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeout);
+          if (!resp.ok) continue;
+          const data = await resp.json();
+          if (data.verses && data.verses.length > 0) {
+            verses = data.verses;
+            break;
+          }
+        } catch(e) { continue; }
       }
 
       const chapSelect = Array.from({length: book.chapters}, (_, i) => i + 1)
