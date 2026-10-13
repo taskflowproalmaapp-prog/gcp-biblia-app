@@ -342,7 +342,7 @@
     GCP.ai = {
       async ask(prompt, maxTokens = 800) {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 25000);
+        const timeout = setTimeout(() => controller.abort(), 5000);
         try {
           const resp = await fetch('/.netlify/functions/ai', {
             method: 'POST',
