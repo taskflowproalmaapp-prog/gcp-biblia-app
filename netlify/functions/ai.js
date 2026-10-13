@@ -34,45 +34,55 @@ exports.handler = async function(event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Falta prompt' }) };
   }
 
-  const modelo = 'gemini-3.5-flash-lite';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${API_KEY}`;
+  // Intentar con múltiples modelos
+  const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-1.5-flash-latest'];
+  
+  for (const modelo of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${API_KEY}`;
 
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
-      })
-    });
+    try {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
+        })
+      });
 
-    const data = await resp.json();
+      const data = await resp.json();
 
-    if (data.error) {
+      // Si el modelo no existe o no está disponible, intentar el siguiente
+      if (data.error) {
+        console.log(`Modelo ${modelo} error:`, data.error.message);
+        continue;
+      }
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!text) {
+        console.log(`Modelo ${modelo}: respuesta vacía`);
+        continue;
+      }
+
       return {
-        statusCode: 500,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: data.error.message })
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+        body: JSON.stringify({ text, model: modelo })
       };
+
+    } catch(e) {
+      console.log(`Modelo ${modelo} excepción:`, e.message);
+      continue;
     }
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify({ text })
-    };
-
-  } catch(e) {
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: e.message })
-    };
   }
+
+  // Si todos fallaron
+  return {
+    statusCode: 500,
+    headers: { 'Access-Control-Allow-Origin': '*' },
+    body: JSON.stringify({ error: 'Todos los modelos fallaron. Intenta de nuevo.' })
+  };
 };
