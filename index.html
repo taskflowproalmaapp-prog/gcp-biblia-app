@@ -469,8 +469,7 @@
         isPaused = false;
         if (!txt) return;
 
-        const clean = txt.replace(/\s+/g, ' ').replace(/
-/g, '. ').trim();
+        const clean = txt.replace(/\s+/g, ' ').replace(/\n/g, '. ').trim();
         showFloating('🧒 ' + (title || 'Lección para niños'));
 
         const chunks = clean.match(/[^.!?]+[.!?]+/g) || [clean];
