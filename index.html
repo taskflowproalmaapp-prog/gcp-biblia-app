@@ -363,11 +363,27 @@
       },
       async askJSON(prompt, maxTokens = 800) {
         const text = await GCP.ai.ask(prompt, maxTokens);
-        const clean = text.replace(/```json|```/g, '').trim();
+        // Limpiar respuesta de Gemini
+        let clean = text.replace(/```json|```/g, '').trim();
         const start = clean.indexOf('{');
         const end = clean.lastIndexOf('}');
         if (start < 0 || end < 0) throw new Error('JSON inválido');
-        return JSON.parse(clean.substring(start, end + 1));
+        clean = clean.substring(start, end + 1);
+        // Intentar parsear — si falla, reintentar con prompt más estricto
+        try {
+          return JSON.parse(clean);
+        } catch(e) {
+          // Segundo intento: pedir solo JSON sin texto extra
+          const text2 = await GCP.ai.ask(
+            prompt + '\n\nIMPORTANTE: Responde ÚNICAMENTE con el objeto JSON, sin texto antes ni después, sin saltos de línea dentro de los valores de texto.',
+            maxTokens
+          );
+          const clean2 = text2.replace(/```json|```/g, '').trim();
+          const s2 = clean2.indexOf('{');
+          const e2 = clean2.lastIndexOf('}');
+          if (s2 < 0 || e2 < 0) throw new Error('JSON inválido en segundo intento');
+          return JSON.parse(clean2.substring(s2, e2 + 1));
+        }
       },
       cache: {
         get(k) { try { const v = localStorage.getItem('gcp_ai_'+k); return v ? JSON.parse(v) : null; } catch(e) { return null; } },
