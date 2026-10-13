@@ -161,6 +161,12 @@
         <p>✨ Generando análisis con IA...</p>
         <small>Solo la primera vez — luego queda guardado</small>
       </div>`;
+    // Guardar texto para botón escuchar (evita problema de comillas en onclick)
+    window._sumText = [book.name, deep.whatHappens||'', deep.context||'',
+      deep.godPurpose||'', deep.practicalLessons||'', deep.christConnection||'',
+      (deep.keyVerses||[]).map(v=>v.ref+'. '+v.text).join('. ')
+    ].filter(Boolean).join('. ');
+    window._sumTitle = 'Resumen de ' + book.name;
     main.scrollTop = 0;
 
     const cached = GCP.ai.cache.get('sum_' + id);
@@ -199,14 +205,7 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" onclick="GCP.speak.text(
-          '${book.name}. ' +
-          (deep.whatHappens||'') + '. ' +
-          (deep.context||'') + '. ' +
-          (deep.godPurpose||'') + '. ' +
-          (deep.practicalLessons||'') + '. ' +
-          (deep.christConnection||''),
-          'Resumen de ${book.name}')">
+        <button class="theme-btn" onclick="GCP.speak.text(window._sumText,window._sumTitle)">
           🔊 Escuchar resumen
         </button>
       </div>`;
