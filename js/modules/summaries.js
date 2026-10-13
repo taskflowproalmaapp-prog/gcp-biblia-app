@@ -161,12 +161,6 @@
         <p>✨ Generando análisis con IA...</p>
         <small>Solo la primera vez — luego queda guardado</small>
       </div>`;
-    // Guardar texto para botón escuchar (evita problema de comillas en onclick)
-    window._sumText = [book.name, deep.whatHappens||'', deep.context||'',
-      deep.godPurpose||'', deep.practicalLessons||'', deep.christConnection||'',
-      (deep.keyVerses||[]).map(v=>v.ref+'. '+v.text).join('. ')
-    ].filter(Boolean).join('. ');
-    window._sumTitle = 'Resumen de ' + book.name;
     main.scrollTop = 0;
 
     const cached = GCP.ai.cache.get('sum_' + id);
@@ -185,6 +179,18 @@ Responde SOLO con este JSON válido, sin texto extra:
       main.querySelector('.sum-ai-loading').innerHTML = '<p style="color:#e57373">⚠️ Error al generar. Intenta de nuevo.</p>';
       return;
     }
+
+    // Guardar texto AQUÍ donde deep ya existe
+    window._sumText = [
+      book.name + '.',
+      deep.whatHappens||'',
+      deep.context||'',
+      deep.godPurpose||'',
+      deep.practicalLessons||'',
+      deep.christConnection||'',
+      (deep.keyVerses||[]).map(v=>v.ref+'. '+v.text).join('. ')
+    ].filter(Boolean).join(' ');
+    window._sumTitle = 'Resumen de ' + book.name;
 
     main.innerHTML = `
       <div class="sum-header">
