@@ -120,6 +120,8 @@ Responde SOLO con este JSON:
 "memoryVerse":"versículo corto para memorizar con su referencia"}`, 800);
 
     if (!cached && lesson) GCP.ai.cache.set('kids_v2_' + id, lesson);
+    GCP.kids._lastLesson = lesson;
+    GCP.kids._lastTopic = topic;
 
     if (!lesson) {
       detail.innerHTML = '<p style="text-align:center;color:#e57373;padding:20px">Error al generar. Intenta de nuevo.</p>';
@@ -151,8 +153,8 @@ Responde SOLO con este JSON:
         border:2px solid rgba(212,175,90,.4);border-radius:14px;padding:20px;margin-bottom:24px;text-align:center;">
         <div style="font-size:36px;margin-bottom:8px;">🎧</div>
         <div style="color:var(--gold);font-weight:700;font-size:16px;margin-bottom:6px;">¡Escucha la lección completa!</div>
-        <div style="color:var(--text2);font-size:13px;margin-bottom:14px;">Ideal para que un adulto lea mientras el niño escucha</div>
-        <button onclick="GCP.speak.text(\`${lessonText.replace(/`/g,"'")}\`,'${topic.name}')"
+        <div style="color:var(--text2);font-size:13px;margin-bottom:14px;">Voz cariñosa especial para niños</div>
+        <button id="kids-listen-btn" onclick="GCP.kids.listen()"
           style="background:var(--gold);color:#0B0E14;border:none;padding:14px 32px;
           border-radius:10px;font-weight:700;cursor:pointer;font-size:16px;margin-right:10px;">
           ▶ Escuchar ahora
@@ -204,7 +206,7 @@ Responde SOLO con este JSON:
       <div class="kids-memory">
         <div class="kids-section-label">📜 Versículo para memorizar</div>
         <div style="font-size:18px;font-style:italic;line-height:1.6;margin:10px 0">"${lesson.memoryVerse||''}"</div>
-        <button onclick="GCP.speak.text('${(lesson.memoryVerse||'').replace(/'/g,"\'")}','Versículo')"
+        <button onclick="GCP.kids.listenVerse()"
           style="background:rgba(212,175,90,.15);border:1px solid rgba(212,175,90,.3);color:var(--gold);
           padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;">
           🔊 Escuchar versículo
@@ -216,7 +218,7 @@ Responde SOLO con este JSON:
         border-radius:12px;padding:20px;margin-top:16px;text-align:center;">
         <div class="kids-section-label">🙏 Oremos juntos</div>
         <p style="color:var(--text);font-size:16px;line-height:1.9;font-style:italic">${lesson.prayer}</p>
-        <button onclick="GCP.speak.text('${(lesson.prayer||'').replace(/'/g,"\'")}','Oración')"
+        <button onclick="GCP.kids.listenPrayer()"
           style="background:rgba(212,175,90,.1);border:1px solid rgba(212,175,90,.3);color:var(--gold);
           padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;">
           🔊 Escuchar oración
@@ -254,6 +256,38 @@ Usa lenguaje que un niño de 8 años pueda entender.`, 600);
     }
   }
 
-  GCP.kids = { open, askCustom };
+  GCP.kids = {
+    open, askCustom,
+    _lastLesson: null,
+    _lastTopic: null,
+    listen() {
+      const l = GCP.kids._lastLesson;
+      const t = GCP.kids._lastTopic;
+      if (!l || !t) { GCP.toast('Primero abre una historia'); return; }
+      const texto = [
+        'Historia de ' + t.name + '.',
+        l.story || '',
+        'Qué significa para mí.',
+        l.meaning || '',
+        l.godCharacter ? ('Así es Dios. ' + l.godCharacter) : '',
+        'Actividad de hoy.',
+        l.activity || '',
+        l.funFact ? ('Dato curioso. ' + l.funFact) : '',
+        'Versículo para memorizar.',
+        l.memoryVerse || ''
+      ].filter(Boolean).join(' ');
+      GCP.speak.kids(texto, t.name);
+    },
+    listenVerse() {
+      const l = GCP.kids._lastLesson;
+      if (!l) return;
+      GCP.speak.kids(l.memoryVerse || '', 'Versículo');
+    },
+    listenPrayer() {
+      const l = GCP.kids._lastLesson;
+      if (!l) return;
+      GCP.speak.kids(l.prayer || '', 'Oración');
+    }
+  };
   renderGrid();
 })();
