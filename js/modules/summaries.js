@@ -199,17 +199,12 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" onclick="GCP.speak.text(
-          '${book.name}. ' +
-          (deep.whatHappens||'') + '. ' +
-          (deep.context||'') + '. ' +
-          (deep.godPurpose||'') + '. ' +
-          (deep.practicalLessons||'') + '. ' +
-          (deep.christConnection||''),
-          'Resumen de ${book.name}')">
+        <button class="theme-btn" id="sum-listen-btn" onclick="GCP.summaries.listen()">
           🔊 Escuchar resumen
         </button>
       </div>`;
+  GCP.summaries._lastDeep = deep;
+  GCP.summaries._lastBook = book;
   }
 
   function setT(t) {
@@ -218,6 +213,25 @@ Responde SOLO con este JSON válido, sin texto extra:
     renderList();
   }
 
-  GCP.summaries = { open, setT };
+  GCP.summaries = {
+    open, setT,
+    _lastDeep: null,
+    _lastBook: null,
+    listen() {
+      const deep = GCP.summaries._lastDeep;
+      const book = GCP.summaries._lastBook;
+      if (!deep || !book) { GCP.toast('Primero abre un libro'); return; }
+      const texto = [
+        book.name + '.',
+        deep.whatHappens || '',
+        deep.context || '',
+        deep.godPurpose || '',
+        deep.practicalLessons || '',
+        deep.christConnection || '',
+        (deep.keyVerses || []).map(v => v.ref + ': ' + v.text).join('. ')
+      ].filter(Boolean).join(' ');
+      GCP.speak.text(texto, 'Resumen de ' + book.name);
+    }
+  };
   renderList();
 })();
