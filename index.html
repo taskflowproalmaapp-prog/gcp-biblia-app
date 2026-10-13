@@ -396,26 +396,43 @@
     /* ── Voz global — disponible en todos los módulos sin cargar audio.js ── */
     GCP.speak = (() => {
       let synth = window.speechSynthesis;
-      let voices = [];
       let selectedVoice = null;
       let isPaused = false;
 
-      // Cargar voces al inicio
+      // Prioridad de voces: las mejores para español latino bíblico
+      const VOICE_PRIORITY = [
+        'Microsoft Sabina Online Natural',
+        'Microsoft Dalia Online Natural',
+        'Microsoft Paulina Online Natural',
+        'Paulina',
+        'Microsoft Jorge Online Natural',
+        'Microsoft Laura Online Natural',
+        'Microsoft Helena Online Natural',
+        'Google español de Estados Unidos',
+        'Google español',
+        'Monica',
+        'Microsoft Elena Online Natural',
+      ];
+
       function loadVoices() {
         const all = synth.getVoices();
-        voices = all.filter(v => v.lang.startsWith('es') || v.lang.startsWith('ES'));
-        if (voices.length === 0) voices = all;
-        // Preferir voces femeninas y cálidas
-        const warm = ['female','mujer','helena','lucia','paulina','maria','sofia','carmen','sabina'];
-        voices.sort((a,b) => {
-          const aW = warm.some(k => a.name.toLowerCase().includes(k)) ? -1 : 1;
-          const bW = warm.some(k => b.name.toLowerCase().includes(k)) ? -1 : 1;
-          return aW - bW;
-        });
-        selectedVoice = voices[0] || null;
+        // Buscar por prioridad exacta primero
+        for (const name of VOICE_PRIORITY) {
+          const found = all.find(v => v.name === name);
+          if (found) { selectedVoice = found; return; }
+        }
+        // Fallback: cualquier voz en español latino (MX, US, AR, CL)
+        const latino = all.find(v => ['es-MX','es-US','es-AR','es-CL','es-CO'].includes(v.lang));
+        if (latino) { selectedVoice = latino; return; }
+        // Fallback: cualquier español
+        const esAny = all.find(v => v.lang.startsWith('es'));
+        if (esAny) { selectedVoice = esAny; return; }
+        // Último recurso: primera voz disponible
+        selectedVoice = all[0] || null;
       }
       synth.onvoiceschanged = loadVoices;
-      setTimeout(loadVoices, 500);
+      setTimeout(loadVoices, 300);
+      setTimeout(loadVoices, 1000);
 
       // Botón flotante de control
       let floatingBtn = null;
@@ -451,17 +468,33 @@
         isPaused = false;
         if (!txt) return;
 
-        showFloating(title || 'Leyendo...');
-        GCP.toast('🔊 Leyendo en voz alta...');
+        // Limpiar el texto para lectura natural
+        const clean = txt
+          .replace(/\s+/g, ' ')
+          .replace(/
+/g, '. ')
+          .replace(/\.{2,}/g, '.')
+          .trim();
 
-        const u = new SpeechSynthesisUtterance(txt);
-        if (selectedVoice) u.voice = selectedVoice;
-        u.rate = 1.0;
-        u.pitch = 1.0;
-        u.lang = selectedVoice?.lang || 'es-ES';
-        u.onend = hideFloating;
-        u.onerror = hideFloating;
-        synth.speak(u);
+        showFloating(title || 'Leyendo...');
+
+        // Dividir en párrafos para mejor control de pausas
+        const chunks = clean.match(/[^.!?]+[.!?]+/g) || [clean];
+        let idx = 0;
+
+        function speakNext() {
+          if (idx >= chunks.length) { hideFloating(); return; }
+          const u = new SpeechSynthesisUtterance(chunks[idx]);
+          if (selectedVoice) u.voice = selectedVoice;
+          u.rate = 0.88;        // Ligeramente más lento — lectura solemne bíblica
+          u.pitch = 1.05;       // Tono ligeramente más cálido
+          u.volume = 1.0;
+          u.lang = selectedVoice?.lang || 'es-MX';
+          u.onend = () => { idx++; setTimeout(speakNext, 80); }; // Pequeña pausa entre oraciones
+          u.onerror = () => { idx++; speakNext(); };
+          synth.speak(u);
+        }
+        speakNext();
       }
 
       function stop() {
