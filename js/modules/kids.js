@@ -2,6 +2,9 @@
 (function() {
   const page = document.getElementById('page-kids');
 
+  let _currentLesson = null;
+  let _currentTopic = null;
+
   const TOPICS = [
     {id:'creacion',name:'La Creación',icon:'🌍',ref:'Génesis 1',age:'4-8'},
     {id:'noe',name:'El Arca de Noé',icon:'🚢',ref:'Génesis 6-8',age:'4-8'},
@@ -120,8 +123,8 @@ Responde SOLO con este JSON:
 "memoryVerse":"versículo corto para memorizar con su referencia"}`, 800);
 
     if (!cached && lesson) GCP.ai.cache.set('kids_v2_' + id, lesson);
-    GCP.kids._lastLesson = lesson;
-    GCP.kids._lastTopic = topic;
+    _currentLesson = lesson;
+    _currentTopic = topic;
 
     if (!lesson) {
       detail.innerHTML = '<p style="text-align:center;color:#e57373;padding:20px">Error al generar. Intenta de nuevo.</p>';
@@ -258,35 +261,31 @@ Usa lenguaje que un niño de 8 años pueda entender.`, 600);
 
   GCP.kids = {
     open, askCustom,
-    _lastLesson: null,
-    _lastTopic: null,
     listen() {
-      const l = GCP.kids._lastLesson;
-      const t = GCP.kids._lastTopic;
-      if (!l || !t) { GCP.toast('Primero abre una historia'); return; }
+      if (!_currentLesson || !_currentTopic) {
+        GCP.toast('Primero abre una historia'); return;
+      }
+      const l = _currentLesson;
+      const t = _currentTopic;
       const texto = [
         'Historia de ' + t.name + '.',
         l.story || '',
         'Qué significa para mí.',
         l.meaning || '',
         l.godCharacter ? ('Así es Dios. ' + l.godCharacter) : '',
-        'Actividad de hoy.',
-        l.activity || '',
+        'Actividad de hoy. ' + (l.activity || ''),
         l.funFact ? ('Dato curioso. ' + l.funFact) : '',
-        'Versículo para memorizar.',
-        l.memoryVerse || ''
+        'Versículo para memorizar. ' + (l.memoryVerse || '')
       ].filter(Boolean).join(' ');
       GCP.speak.kids(texto, t.name);
     },
     listenVerse() {
-      const l = GCP.kids._lastLesson;
-      if (!l) return;
-      GCP.speak.kids(l.memoryVerse || '', 'Versículo');
+      if (!_currentLesson) return;
+      GCP.speak.kids(_currentLesson.memoryVerse || '', 'Versículo');
     },
     listenPrayer() {
-      const l = GCP.kids._lastLesson;
-      if (!l) return;
-      GCP.speak.kids(l.prayer || '', 'Oración');
+      if (!_currentLesson) return;
+      GCP.speak.kids(_currentLesson.prayer || '', 'Oración');
     }
   };
   renderGrid();
