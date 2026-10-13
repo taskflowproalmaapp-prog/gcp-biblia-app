@@ -72,8 +72,6 @@
   ];
 
   let state = { testament: 'ALL', active: null };
-  let _currentDeep = null;
-  let _currentBook = null;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -201,13 +199,17 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" id="sum-listen-btn" onclick="GCP.summaries.listen()">
+        <button class="theme-btn" onclick="GCP.speak.text(
+          '${book.name}. ' +
+          (deep.whatHappens||'') + '. ' +
+          (deep.context||'') + '. ' +
+          (deep.godPurpose||'') + '. ' +
+          (deep.practicalLessons||'') + '. ' +
+          (deep.christConnection||''),
+          'Resumen de ${book.name}')">
           🔊 Escuchar resumen
         </button>
       </div>`;
-    // Guardar referencia para el botón de escuchar
-    _currentDeep = deep;
-    _currentBook = book;
   }
 
   function setT(t) {
@@ -216,25 +218,6 @@ Responde SOLO con este JSON válido, sin texto extra:
     renderList();
   }
 
-  GCP.summaries = {
-    open, setT,
-    listen() {
-      if (!_currentDeep || !_currentBook) {
-        GCP.toast('Primero abre un libro'); return;
-      }
-      const d = _currentDeep;
-      const b = _currentBook;
-      const texto = [
-        b.name + '.',
-        d.whatHappens || '',
-        d.context || '',
-        d.godPurpose || '',
-        d.practicalLessons || '',
-        d.christConnection || '',
-        (d.keyVerses || []).map(v => v.ref + '. ' + v.text).join('. ')
-      ].filter(Boolean).join(' ');
-      GCP.speak.text(texto, 'Resumen de ' + b.name);
-    }
-  };
+  GCP.summaries = { open, setT };
   renderList();
 })();
