@@ -463,6 +463,34 @@
       }
 
       // Hablar un texto largo párrafo por párrafo
+      /* Voz especial para niños — más lenta, cariñosa y expresiva */
+      function kids(txt, title) {
+        synth.cancel();
+        isPaused = false;
+        if (!txt) return;
+
+        const clean = txt.replace(/\s+/g, ' ').replace(/
+/g, '. ').trim();
+        showFloating('🧒 ' + (title || 'Lección para niños'));
+
+        const chunks = clean.match(/[^.!?]+[.!?]+/g) || [clean];
+        let idx = 0;
+
+        function speakNext() {
+          if (idx >= chunks.length) { hideFloating(); return; }
+          const u = new SpeechSynthesisUtterance(chunks[idx]);
+          if (selectedVoice) u.voice = selectedVoice;
+          u.rate = 0.78;     // Muy lento y pausado para niños
+          u.pitch = 1.25;    // Tono más agudo y cariñoso
+          u.volume = 1.0;
+          u.lang = selectedVoice?.lang || 'es-MX';
+          u.onend = () => { idx++; setTimeout(speakNext, 150); }; // Más pausa entre frases
+          u.onerror = () => { idx++; speakNext(); };
+          synth.speak(u);
+        }
+        speakNext();
+      }
+
       function text(txt, title) {
         synth.cancel();
         isPaused = false;
@@ -511,7 +539,7 @@
         if (isPaused) { synth.resume(); isPaused = false; }
       }
 
-      return { text, stop, pause, resume };
+      return { text, kids, stop, pause, resume };
     })();
 
     /* ── Activar trial al primer acceso ── */
