@@ -72,6 +72,8 @@
   ];
 
   let state = { testament: 'ALL', active: null };
+  let _currentDeep = null;
+  let _currentBook = null;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -203,8 +205,9 @@ Responde SOLO con este JSON válido, sin texto extra:
           🔊 Escuchar resumen
         </button>
       </div>`;
-  GCP.summaries._lastDeep = deep;
-  GCP.summaries._lastBook = book;
+    // Guardar referencia para el botón de escuchar
+    _currentDeep = deep;
+    _currentBook = book;
   }
 
   function setT(t) {
@@ -215,22 +218,22 @@ Responde SOLO con este JSON válido, sin texto extra:
 
   GCP.summaries = {
     open, setT,
-    _lastDeep: null,
-    _lastBook: null,
     listen() {
-      const deep = GCP.summaries._lastDeep;
-      const book = GCP.summaries._lastBook;
-      if (!deep || !book) { GCP.toast('Primero abre un libro'); return; }
+      if (!_currentDeep || !_currentBook) {
+        GCP.toast('Primero abre un libro'); return;
+      }
+      const d = _currentDeep;
+      const b = _currentBook;
       const texto = [
-        book.name + '.',
-        deep.whatHappens || '',
-        deep.context || '',
-        deep.godPurpose || '',
-        deep.practicalLessons || '',
-        deep.christConnection || '',
-        (deep.keyVerses || []).map(v => v.ref + ': ' + v.text).join('. ')
+        b.name + '.',
+        d.whatHappens || '',
+        d.context || '',
+        d.godPurpose || '',
+        d.practicalLessons || '',
+        d.christConnection || '',
+        (d.keyVerses || []).map(v => v.ref + '. ' + v.text).join('. ')
       ].filter(Boolean).join(' ');
-      GCP.speak.text(texto, 'Resumen de ' + book.name);
+      GCP.speak.text(texto, 'Resumen de ' + b.name);
     }
   };
   renderList();
