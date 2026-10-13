@@ -180,18 +180,6 @@ Responde SOLO con este JSON válido, sin texto extra:
       return;
     }
 
-    // Guardar texto AQUÍ donde deep ya existe
-    window._sumText = [
-      book.name + '.',
-      deep.whatHappens||'',
-      deep.context||'',
-      deep.godPurpose||'',
-      deep.practicalLessons||'',
-      deep.christConnection||'',
-      (deep.keyVerses||[]).map(v=>v.ref+'. '+v.text).join('. ')
-    ].filter(Boolean).join(' ');
-    window._sumTitle = 'Resumen de ' + book.name;
-
     main.innerHTML = `
       <div class="sum-header">
         <div class="sum-header-icon">${book.icon}</div>
@@ -211,7 +199,14 @@ Responde SOLO con este JSON válido, sin texto extra:
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" onclick="GCP.speak.text(window._sumText,window._sumTitle)">
+        <button class="theme-btn" onclick="GCP.speak.text(
+          '${book.name}. ' +
+          (deep.whatHappens||'') + '. ' +
+          (deep.context||'') + '. ' +
+          (deep.godPurpose||'') + '. ' +
+          (deep.practicalLessons||'') + '. ' +
+          (deep.christConnection||''),
+          'Resumen de ${book.name}')">
           🔊 Escuchar resumen
         </button>
       </div>`;
