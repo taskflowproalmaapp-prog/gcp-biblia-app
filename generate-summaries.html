@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generar Resúmenes — Admin</title>
+<style>
+  body{background:#0B0E14;color:#F5F0E8;font-family:system-ui;padding:20px;max-width:900px;margin:0 auto;}
+  h1{color:#D4AF5A;margin-bottom:8px;}
+  p{color:#8892a4;margin-bottom:20px;}
+  .btn{background:#D4AF5A;color:#0B0E14;border:none;padding:12px 28px;border-radius:8px;
+    font-size:15px;font-weight:700;cursor:pointer;margin-right:10px;margin-bottom:10px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-outline{background:none;border:1px solid rgba(212,175,90,.4);color:#D4AF5A;}
+  .progress{background:#131720;border-radius:10px;padding:20px;margin-bottom:20px;}
+  .progress-bar-wrap{background:rgba(212,175,90,.1);border-radius:4px;height:8px;margin:12px 0;}
+  .progress-bar{background:#D4AF5A;height:100%;border-radius:4px;transition:width .3s;}
+  .progress-text{color:#8892a4;font-size:13px;}
+  .book-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:20px;}
+  .book-item{background:#131720;border:1px solid rgba(212,175,90,.1);border-radius:8px;
+    padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px;}
+  .book-item.done{border-color:rgba(100,200,100,.4);color:#81c784;}
+  .book-item.error{border-color:rgba(255,100,100,.4);color:#e57373;}
+  .book-item.active{border-color:#D4AF5A;color:#D4AF5A;}
+  .status-icon{font-size:16px;}
+  .output{background:#131720;border:1px solid rgba(212,175,90,.2);border-radius:8px;
+    padding:16px;font-size:12px;font-family:monospace;max-height:300px;overflow-y:auto;
+    white-space:pre-wrap;word-break:break-all;margin-bottom:16px;}
+  .copy-btn{background:#2e7d32;color:#fff;border:none;padding:10px 20px;border-radius:6px;
+    cursor:pointer;font-weight:600;font-size:14px;}
+  .copy-btn:hover{background:#388e3c;}
+  .stats{display:flex;gap:20px;margin-bottom:16px;}
+  .stat{background:#131720;border-radius:8px;padding:12px 16px;text-align:center;}
+  .stat-num{font-size:24px;font-weight:700;color:#D4AF5A;}
+  .stat-label{font-size:12px;color:#8892a4;}
+</style>
+</head>
+<body>
+
+<h1>🔧 Generador de Resúmenes Bíblicos</h1>
+<p>Genera los resúmenes de los 66 libros con IA y descarga el archivo JSON para incluirlo en la app.</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label">Generados</div></div>
+  <div class="stat"><div class="stat-num" id="stat-error">0</div><div class="stat-label">Errores</div></div>
+  <div class="stat"><div class="stat-num" id="stat-pending">66</div><div class="stat-label">Pendientes</div></div>
+  <div class="stat"><div class="stat-num" id="stat-time">—</div><div class="stat-label">Tiempo aprox.</div></div>
+</div>
+
+<div class="progress">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+    <span id="progress-label" style="color:#D4AF5A;font-weight:600">Listo para generar</span>
+    <span id="progress-pct" style="color:#8892a4">0%</span>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+  </div>
+  <div class="progress-text" id="progress-text">Haz clic en "Generar Todos" para comenzar.</div>
+</div>
+
+<button class="btn" id="btn-start" onclick="startGeneration()">▶ Generar Todos (66 libros)</button>
+<button class="btn btn-outline" id="btn-stop" onclick="stopGeneration()" disabled>⏹ Detener</button>
+<button class="btn btn-outline" onclick="downloadJSON()" id="btn-download" disabled>⬇ Descargar summaries.json</button>
+
+<div class="book-list" id="book-list"></div>
+
+<div id="output-section" style="display:none">
+  <h3 style="color:#D4AF5A;margin-bottom:8px">📄 JSON Generado</h3>
+  <div class="output" id="output"></div>
+  <button class="copy-btn" onclick="copyJSON()">📋 Copiar JSON completo</button>
+</div>
+
+<script>
+const BOOKS = [
+  {id:'gn',name:'Génesis',t:'AT'},{id:'ex',name:'Éxodo',t:'AT'},{id:'lv',name:'Levítico',t:'AT'},
+  {id:'nm',name:'Números',t:'AT'},{id:'dt',name:'Deuteronomio',t:'AT'},{id:'jos',name:'Josué',t:'AT'},
+  {id:'jue',name:'Jueces',t:'AT'},{id:'rt',name:'Rut',t:'AT'},{id:'1sm',name:'1 Samuel',t:'AT'},
+  {id:'2sm',name:'2 Samuel',t:'AT'},{id:'1re',name:'1 Reyes',t:'AT'},{id:'2re',name:'2 Reyes',t:'AT'},
+  {id:'1cr',name:'1 Crónicas',t:'AT'},{id:'2cr',name:'2 Crónicas',t:'AT'},{id:'esd',name:'Esdras',t:'AT'},
+  {id:'neh',name:'Nehemías',t:'AT'},{id:'est',name:'Ester',t:'AT'},{id:'job',name:'Job',t:'AT'},
+  {id:'sal',name:'Salmos',t:'AT'},{id:'pr',name:'Proverbios',t:'AT'},{id:'ec',name:'Eclesiastés',t:'AT'},
+  {id:'cnt',name:'Cantares',t:'AT'},{id:'is',name:'Isaías',t:'AT'},{id:'jer',name:'Jeremías',t:'AT'},
+  {id:'lm',name:'Lamentaciones',t:'AT'},{id:'ez',name:'Ezequiel',t:'AT'},{id:'dn',name:'Daniel',t:'AT'},
+  {id:'os',name:'Oseas',t:'AT'},{id:'jl',name:'Joel',t:'AT'},{id:'am',name:'Amós',t:'AT'},
+  {id:'ab',name:'Abdías',t:'AT'},{id:'jon',name:'Jonás',t:'AT'},{id:'mi',name:'Miqueas',t:'AT'},
+  {id:'nah',name:'Nahúm',t:'AT'},{id:'hab',name:'Habacuc',t:'AT'},{id:'sof',name:'Sofonías',t:'AT'},
+  {id:'hag',name:'Hageo',t:'AT'},{id:'zac',name:'Zacarías',t:'AT'},{id:'mal',name:'Malaquías',t:'AT'},
+  {id:'mt',name:'Mateo',t:'NT'},{id:'mr',name:'Marcos',t:'NT'},{id:'lc',name:'Lucas',t:'NT'},
+  {id:'jn',name:'Juan',t:'NT'},{id:'hch',name:'Hechos',t:'NT'},{id:'ro',name:'Romanos',t:'NT'},
+  {id:'1co',name:'1 Corintios',t:'NT'},{id:'2co',name:'2 Corintios',t:'NT'},{id:'ga',name:'Gálatas',t:'NT'},
+  {id:'ef',name:'Efesios',t:'NT'},{id:'flp',name:'Filipenses',t:'NT'},{id:'col',name:'Colosenses',t:'NT'},
+  {id:'1ts',name:'1 Tesalonicenses',t:'NT'},{id:'2ts',name:'2 Tesalonicenses',t:'NT'},
+  {id:'1ti',name:'1 Timoteo',t:'NT'},{id:'2ti',name:'2 Timoteo',t:'NT'},{id:'tit',name:'Tito',t:'NT'},
+  {id:'flm',name:'Filemón',t:'NT'},{id:'heb',name:'Hebreos',t:'NT'},{id:'stg',name:'Santiago',t:'NT'},
+  {id:'1pe',name:'1 Pedro',t:'NT'},{id:'2pe',name:'2 Pedro',t:'NT'},{id:'1jn',name:'1 Juan',t:'NT'},
+  {id:'2jn',name:'2 Juan',t:'NT'},{id:'3jn',name:'3 Juan',t:'NT'},{id:'jud',name:'Judas',t:'NT'},
+  {id:'ap',name:'Apocalipsis',t:'NT'}
+];
+
+let results = {};
+let running = false;
+let startTime = null;
+
+// Renderizar lista de libros
+function renderBooks() {
+  const list = document.getElementById('book-list');
+  list.innerHTML = BOOKS.map(b => `
+    <div class="book-item" id="book-${b.id}">
+      <span class="status-icon" id="icon-${b.id}">⬜</span>
+      <span>${b.name}</span>
+    </div>`).join('');
+}
+
+async function generateBook(book) {
+  const prompt = `Eres experto en Biblia Reina Valera 1960. Para el libro de ${book.name}, responde SOLO con JSON válido sin texto extra ni markdown:
+{"whatHappens":"qué ocurre en este libro (3-4 oraciones detalladas)","context":"contexto histórico y cultural (2-3 oraciones)","godPurpose":"propósito de Dios revelado (2-3 oraciones)","practicalLessons":"3 lecciones prácticas para hoy en dia","christConnection":"cómo apunta a Cristo o lo prefigura (2-3 oraciones)","keyVerses":[{"ref":"referencia exacta","text":"versículo exacto de la Biblia RV1960"},{"ref":"referencia exacta","text":"versículo exacto de la Biblia RV1960"},{"ref":"referencia exacta","text":"versículo exacto de la Biblia RV1960"}],"curiosities":["dato curioso y sorprendente 1","dato curioso y sorprendente 2","dato curioso y sorprendente 3"]}`;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const resp = await fetch('/.netlify/functions/ai', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({prompt, maxTokens: 1000})
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+
+      let clean = data.text.replace(/```json|```/g, '').trim();
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+      if (s < 0 || e < 0) throw new Error('JSON inválido');
+      return JSON.parse(clean.substring(s, e+1));
+    } catch(err) {
+      if (attempt < 2) await new Promise(r => setTimeout(r, 3000));
+      else throw err;
+    }
+  }
+}
+
+async function startGeneration() {
+  running = true;
+  startTime = Date.now();
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+
+  let done = 0, errors = 0;
+
+  for (let i = 0; i < BOOKS.length; i++) {
+    if (!running) break;
+    const book = BOOKS[i];
+
+    // Actualizar UI
+    const item = document.getElementById('book-' + book.id);
+    const icon = document.getElementById('icon-' + book.id);
+    if (item) item.className = 'book-item active';
+    if (icon) icon.textContent = '⏳';
+
+    document.getElementById('progress-label').textContent = `Generando: ${book.name}...`;
+    document.getElementById('progress-text').textContent = `${i+1} de ${BOOKS.length} — ${book.name}`;
+    const pct = Math.round(i / BOOKS.length * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+
+    try {
+      const data = await generateBook(book);
+      results[book.id] = data;
+      done++;
+
+      if (item) item.className = 'book-item done';
+      if (icon) icon.textContent = '✅';
+
+      // Guardar en localStorage progresivamente
+      localStorage.setItem('gen_summaries', JSON.stringify(results));
+    } catch(err) {
+      errors++;
+      if (item) item.className = 'book-item error';
+      if (icon) icon.textContent = '❌';
+      console.error(book.name, err);
+    }
+
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-error').textContent = errors;
+    document.getElementById('stat-pending').textContent = BOOKS.length - i - 1;
+
+    const elapsed = (Date.now() - startTime) / 1000;
+    const perBook = elapsed / (i + 1);
+    const remaining = Math.round(perBook * (BOOKS.length - i - 1));
+    document.getElementById('stat-time').textContent = remaining + 's';
+
+    // Pausa entre requests para no saturar la API
+    if (i < BOOKS.length - 1) await new Promise(r => setTimeout(r, 1500));
+  }
+
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  document.getElementById('btn-download').disabled = false;
+  document.getElementById('progress-bar').style.width = '100%';
+  document.getElementById('progress-pct').textContent = '100%';
+  document.getElementById('progress-label').textContent = `✅ Completado — ${done} generados, ${errors} errores`;
+
+  // Mostrar JSON
+  const json = JSON.stringify(results, null, 2);
+  document.getElementById('output-section').style.display = 'block';
+  document.getElementById('output').textContent = json.substring(0, 2000) + '...';
+}
+
+function stopGeneration() {
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  document.getElementById('btn-download').disabled = Object.keys(results).length === 0;
+  document.getElementById('progress-label').textContent = 'Detenido';
+}
+
+function downloadJSON() {
+  const json = JSON.stringify(results, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'summaries.json';
+  a.click();
+}
+
+function copyJSON() {
+  const json = JSON.stringify(results, null, 2);
+  navigator.clipboard.writeText(json).then(() => alert('JSON copiado al portapapeles'));
+}
+
+// Restaurar progreso guardado
+const saved = localStorage.getItem('gen_summaries');
+if (saved) {
+  try {
+    results = JSON.parse(saved);
+    const done = Object.keys(results).length;
+    if (done > 0) {
+      document.getElementById('stat-done').textContent = done;
+      document.getElementById('stat-pending').textContent = 66 - done;
+      document.getElementById('btn-download').disabled = false;
+      BOOKS.forEach(b => {
+        if (results[b.id]) {
+          const item = document.getElementById('book-' + b.id);
+          const icon = document.getElementById('icon-' + b.id);
+          if (item) item.className = 'book-item done';
+          if (icon) icon.textContent = '✅';
+        }
+      });
+      document.getElementById('progress-label').textContent = `${done} ya generados — puedes continuar`;
+    }
+  } catch(e) {}
+}
+
+renderBooks();
+// Restaurar estado visual
+const saved2 = localStorage.getItem('gen_summaries');
+if (saved2) {
+  try {
+    const r = JSON.parse(saved2);
+    BOOKS.forEach(b => {
+      if (r[b.id]) {
+        const item = document.getElementById('book-' + b.id);
+        const icon = document.getElementById('icon-' + b.id);
+        if (item) item.className = 'book-item done';
+        if (icon) icon.textContent = '✅';
+      }
+    });
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
