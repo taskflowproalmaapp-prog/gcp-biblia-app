@@ -163,17 +163,16 @@
       </div>`;
     main.scrollTop = 0;
 
-    const cached = GCP.ai.cache.get('sum_' + id);
-    const deep = cached || await GCP.ai.askJSON(
-      `Eres experto en Biblia Reina Valera 1960. Analiza el libro de ${book.name}.
-Responde SOLO con este JSON válido, sin texto extra:
-{"whatHappens":"qué ocurre (3-4 oraciones)","context":"contexto histórico (2-3 oraciones)",
-"godPurpose":"propósito de Dios (2-3 oraciones)","practicalLessons":"3 lecciones prácticas hoy",
-"christConnection":"conexión con Cristo (2-3 oraciones)",
-"keyVerses":[{"ref":"Libro cap:vers","text":"versículo exacto RV1960"},{"ref":"Libro cap:vers","text":"versículo exacto RV1960"},{"ref":"Libro cap:vers","text":"versículo exacto RV1960"}],
-"curiosities":["dato curioso 1","dato curioso 2","dato curioso 3"]}`, 1000);
-
-    if (!cached && deep) GCP.ai.cache.set('sum_' + id, deep);
+    // Cargar desde archivo pre-generado (instantáneo, sin IA)
+    if (!window._SUMMARIES_DATA) {
+      try {
+        const resp = await fetch('summaries.json');
+        window._SUMMARIES_DATA = await resp.json();
+      } catch(e) {
+        window._SUMMARIES_DATA = {};
+      }
+    }
+    const deep = window._SUMMARIES_DATA[id] || null;
 
     if (!deep) {
       main.querySelector('.sum-ai-loading').innerHTML = '<p style="color:#e57373">⚠️ Error al generar. Intenta de nuevo.</p>';
