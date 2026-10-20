@@ -1,1 +1,557 @@
-{"cats": [{"key": "nacimiento", "label": "Nacimiento y origen"}, {"key": "ministerio", "label": "Vida y ministerio"}, {"key": "rechazo", "label": "Rechazo y traición"}, {"key": "muerte", "label": "Sufrimiento y muerte"}, {"key": "resurreccion", "label": "Resurrección y exaltación"}, {"key": "reino", "label": "El Reino del Mesías"}], "pairs": [{"ref": "Génesis 3:15", "bookId": "gn", "chapter": 3, "text": "«Esta te herirá en la cabeza, y tú le herirás en el calcañar.»"}, {"ref": "Gálatas 4:4", "bookId": "ga", "chapter": 4, "text": "«Cuando vino el cumplimiento del tiempo, Dios envió a su Hijo, nacido de mujer…»"}, {"ref": "Génesis 22:18", "bookId": "gn", "chapter": 22, "text": "«En tu simiente serán benditas todas las naciones de la tierra.»"}, {"ref": "Gálatas 3:16", "bookId": "ga", "chapter": 3, "text": "«…y a tu simiente, la cual es Cristo.»"}, {"ref": "Génesis 49:10", "bookId": "gn", "chapter": 49, "text": "«No será quitado el cetro de Judá… hasta que venga Siloh.»"}, {"ref": "Hebreos 7:14", "bookId": "he", "chapter": 7, "text": "«Nuestro Señor vino de la tribu de Judá.»"}, {"ref": "2 Samuel 7:12", "bookId": "2sm", "chapter": 7, "text": "«…afirmaré el trono de su reino para siempre.»"}, {"ref": "Lucas 1:32", "bookId": "lc", "chapter": 1, "text": "«…y le dará el Señor Dios el trono de David su padre.»"}, {"ref": "Isaías 7:14", "bookId": "is", "chapter": 7, "text": "«He aquí que la virgen concebirá, y dará a luz un hijo, y llamará su nombre Emanuel.»"}, {"ref": "Mateo 1:23", "bookId": "mt", "chapter": 1, "text": "«He aquí, una virgen concebirá y dará a luz un hijo… Dios con nosotros.»"}, {"ref": "Miqueas 5:2", "bookId": "miq", "chapter": 5, "text": "«Y tú, Belén Efrata… de ti me saldrá el que será Señor en Israel.»"}, {"ref": "Mateo 2:1", "bookId": "mt", "chapter": 2, "text": "«Cuando Jesús nació en Belén de Judea…»"}, {"ref": "Oseas 11:1", "bookId": "os", "chapter": 11, "text": "«…y de Egipto llamé a mi hijo.»"}, {"ref": "Mateo 2:15", "bookId": "mt", "chapter": 2, "text": "«De Egipto llamé a mi Hijo.»"}, {"ref": "Malaquías 3:1", "bookId": "mal", "chapter": 3, "text": "«He aquí, yo envío mi mensajero, el cual preparará el camino delante de mí.»"}, {"ref": "Mateo 3:1", "bookId": "mt", "chapter": 3, "text": "«En aquellos días vino Juan el Bautista predicando en el desierto…»"}, {"ref": "Isaías 61:1", "bookId": "is", "chapter": 61, "text": "«El Espíritu de Jehová… me ha enviado a predicar buenas nuevas a los abatidos.»"}, {"ref": "Lucas 4:18", "bookId": "lc", "chapter": 4, "text": "«Hoy se ha cumplido esta Escritura delante de vosotros.»"}, {"ref": "Isaías 9:2", "bookId": "is", "chapter": 9, "text": "«El pueblo que andaba en tinieblas vio gran luz.»"}, {"ref": "Mateo 4:16", "bookId": "mt", "chapter": 4, "text": "«El pueblo asentado en tinieblas vio gran luz.»"}, {"ref": "Salmos 78:2", "bookId": "sal", "chapter": 78, "text": "«Abriré mi boca en proverbios; hablaré cosas escondidas desde tiempos antiguos.»"}, {"ref": "Mateo 13:34", "bookId": "mt", "chapter": 13, "text": "«Sin parábolas no les hablaba.»"}, {"ref": "Deuteronomio 18:15", "bookId": "dt", "chapter": 18, "text": "«Profeta de en medio de ti… te levantará Jehová tu Dios; a él oiréis.»"}, {"ref": "Hechos 3:22", "bookId": "hch", "chapter": 3, "text": "«El Señor os levantará profeta… a él oiréis en todas las cosas.»"}, {"ref": "Zacarías 9:9", "bookId": "zac", "chapter": 9, "text": "«He aquí tu rey vendrá a ti… humilde, y cabalgando sobre un asno.»"}, {"ref": "Mateo 21:5", "bookId": "mt", "chapter": 21, "text": "«He aquí, tu Rey viene a ti, manso, y sentado sobre una asna…»"}, {"ref": "Salmos 118:22", "bookId": "sal", "chapter": 118, "text": "«La piedra que desecharon los edificadores ha venido a ser cabeza del ángulo.»"}, {"ref": "1 Pedro 2:7", "bookId": "1pe", "chapter": 2, "text": "«La piedra que los edificadores desecharon… ha venido a ser la cabeza del ángulo.»"}, {"ref": "Salmos 41:9", "bookId": "sal", "chapter": 41, "text": "«El que de mi pan comía, alzó contra mí el calcañar.»"}, {"ref": "Juan 13:18", "bookId": "jn", "chapter": 13, "text": "«El que come pan conmigo, levantó contra mí su calcañar.»"}, {"ref": "Zacarías 11:12", "bookId": "zac", "chapter": 11, "text": "«Pesaron por mi salario treinta piezas de plata.»"}, {"ref": "Mateo 26:15", "bookId": "mt", "chapter": 26, "text": "«…y ellos le asignaron treinta piezas de plata.»"}, {"ref": "Isaías 53:5", "bookId": "is", "chapter": 53, "text": "«Mas él herido fue por nuestras rebeliones, molido por nuestros pecados.»"}, {"ref": "1 Pedro 2:24", "bookId": "1pe", "chapter": 2, "text": "«…quien llevó él mismo nuestros pecados en su cuerpo sobre el madero.»"}, {"ref": "Isaías 53:7", "bookId": "is", "chapter": 53, "text": "«Como cordero fue llevado al matadero… enmudeció, y no abrió su boca.»"}, {"ref": "Hechos 8:32", "bookId": "hch", "chapter": 8, "text": "«Como oveja a la muerte fue llevado…»"}, {"ref": "Salmos 22:16", "bookId": "sal", "chapter": 22, "text": "«Horadaron mis manos y mis pies.»"}, {"ref": "Lucas 23:33", "bookId": "lc", "chapter": 23, "text": "«…le crucificaron allí.»"}, {"ref": "Salmos 22:18", "bookId": "sal", "chapter": 22, "text": "«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»"}, {"ref": "Juan 19:24", "bookId": "jn", "chapter": 19, "text": "«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»"}, {"ref": "Salmos 34:20", "bookId": "sal", "chapter": 34, "text": "«Él guarda todos sus huesos; ni uno de ellos será quebrantado.»"}, {"ref": "Juan 19:36", "bookId": "jn", "chapter": 19, "text": "«No será quebrado hueso suyo.»"}, {"ref": "Zacarías 12:10", "bookId": "zac", "chapter": 12, "text": "«…mirarán a mí, a quien traspasaron.»"}, {"ref": "Juan 19:34", "bookId": "jn", "chapter": 19, "text": "«Uno de los soldados le abrió el costado con una lanza.»"}, {"ref": "Isaías 53:9", "bookId": "is", "chapter": 53, "text": "«Y se dispuso con los impíos su sepultura, mas con los ricos fue en su muerte.»"}, {"ref": "Mateo 27:57", "bookId": "mt", "chapter": 27, "text": "«…un hombre rico de Arimatea… puso en su sepulcro nuevo.»"}, {"ref": "Salmos 16:10", "bookId": "sal", "chapter": 16, "text": "«No dejarás… que tu santo vea corrupción.»"}, {"ref": "Hechos 2:31", "bookId": "hch", "chapter": 2, "text": "«…que su alma no fue dejada en el Hades, ni su carne vio corrupción.»"}, {"ref": "Jonás 1:17", "bookId": "jon", "chapter": 1, "text": "«Y estuvo Jonás en el vientre del pez tres días y tres noches.»"}, {"ref": "Mateo 12:40", "bookId": "mt", "chapter": 12, "text": "«…así estará el Hijo del Hombre… tres días y tres noches.»"}, {"ref": "Salmos 110:1", "bookId": "sal", "chapter": 110, "text": "«Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado.»"}, {"ref": "Hechos 2:34", "bookId": "hch", "chapter": 2, "text": "«Siéntate a mi diestra…»"}, {"ref": "Joel 2:28", "bookId": "jl", "chapter": 2, "text": "«Derramaré mi Espíritu sobre toda carne.»"}, {"ref": "Hechos 2:17", "bookId": "hch", "chapter": 2, "text": "«Derramaré de mi Espíritu sobre toda carne.»"}, {"ref": "Daniel 7:13", "bookId": "dn", "chapter": 7, "text": "«…con las nubes del cielo venía uno como un hijo de hombre.»"}, {"ref": "Mateo 26:64", "bookId": "mt", "chapter": 26, "text": "«Veréis al Hijo del Hombre… viniendo en las nubes del cielo.»"}, {"ref": "Jeremías 31:31", "bookId": "jer", "chapter": 31, "text": "«…haré nuevo pacto con la casa de Israel.»"}, {"ref": "Lucas 22:20", "bookId": "lc", "chapter": 22, "text": "«Esta copa es el nuevo pacto en mi sangre.»"}, {"ref": "Isaías 49:6", "bookId": "is", "chapter": 49, "text": "«Te di por luz de las naciones, para que seas mi salvación hasta lo postrero de la tierra.»"}, {"ref": "Hechos 13:47", "bookId": "hch", "chapter": 13, "text": "«Te he puesto para luz de los gentiles…»"}, {"ref": "Salmos 110:4", "bookId": "sal", "chapter": 110, "text": "«Tú eres sacerdote para siempre según el orden de Melquisedec.»"}, {"ref": "Hebreos 5:6", "bookId": "he", "chapter": 5, "text": "«Tú eres sacerdote para siempre, según el orden de Melquisedec.»"}]}
+{
+  "cats": [
+    {
+      "key": "nacimiento",
+      "label": "Nacimiento y origen"
+    },
+    {
+      "key": "ministerio",
+      "label": "Vida y ministerio"
+    },
+    {
+      "key": "rechazo",
+      "label": "Rechazo y traición"
+    },
+    {
+      "key": "muerte",
+      "label": "Sufrimiento y muerte"
+    },
+    {
+      "key": "resurreccion",
+      "label": "Resurrección y exaltación"
+    },
+    {
+      "key": "reino",
+      "label": "El Reino del Mesías"
+    }
+  ],
+  "pairs": [
+    {
+      "cat": "nacimiento",
+      "theme": "La simiente de la mujer",
+      "prophecy": {
+        "ref": "Génesis 3:15",
+        "bookId": "gn",
+        "chapter": 3,
+        "text": "«Esta te herirá en la cabeza, y tú le herirás en el calcañar.»"
+      },
+      "fulfillment": {
+        "ref": "Gálatas 4:4",
+        "bookId": "ga",
+        "chapter": 4,
+        "text": "«Cuando vino el cumplimiento del tiempo, Dios envió a su Hijo, nacido de mujer…»"
+      },
+      "note": "La primera promesa de la Biblia anuncia al que vencería a Satanás: nace de mujer para destruir las obras del diablo."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "Descendiente de Abraham",
+      "prophecy": {
+        "ref": "Génesis 22:18",
+        "bookId": "gn",
+        "chapter": 22,
+        "text": "«En tu simiente serán benditas todas las naciones de la tierra.»"
+      },
+      "fulfillment": {
+        "ref": "Gálatas 3:16",
+        "bookId": "ga",
+        "chapter": 3,
+        "text": "«…y a tu simiente, la cual es Cristo.»"
+      },
+      "note": "La bendición prometida a todas las naciones se cumple en un solo descendiente: Cristo."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "De la tribu de Judá",
+      "prophecy": {
+        "ref": "Génesis 49:10",
+        "bookId": "gn",
+        "chapter": 49,
+        "text": "«No será quitado el cetro de Judá… hasta que venga Siloh.»"
+      },
+      "fulfillment": {
+        "ref": "Hebreos 7:14",
+        "bookId": "he",
+        "chapter": 7,
+        "text": "«Nuestro Señor vino de la tribu de Judá.»"
+      },
+      "note": "El cetro real permanecería en Judá hasta la venida del Mesías."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "Heredero del trono de David",
+      "prophecy": {
+        "ref": "2 Samuel 7:12",
+        "bookId": "2sm",
+        "chapter": 7,
+        "text": "«…afirmaré el trono de su reino para siempre.»"
+      },
+      "fulfillment": {
+        "ref": "Lucas 1:32",
+        "bookId": "lc",
+        "chapter": 1,
+        "text": "«…y le dará el Señor Dios el trono de David su padre.»"
+      },
+      "note": "El pacto con David halla su cumplimiento eterno en Jesús, el Hijo de David."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "Nacido de una virgen",
+      "prophecy": {
+        "ref": "Isaías 7:14",
+        "bookId": "is",
+        "chapter": 7,
+        "text": "«He aquí que la virgen concebirá, y dará a luz un hijo, y llamará su nombre Emanuel.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 1:23",
+        "bookId": "mt",
+        "chapter": 1,
+        "text": "«He aquí, una virgen concebirá y dará a luz un hijo… Dios con nosotros.»"
+      },
+      "note": "Setecientos años antes, Isaías anuncia el nacimiento virginal de «Dios con nosotros»."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "Nacido en Belén",
+      "prophecy": {
+        "ref": "Miqueas 5:2",
+        "bookId": "miq",
+        "chapter": 5,
+        "text": "«Y tú, Belén Efrata… de ti me saldrá el que será Señor en Israel.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 2:1",
+        "bookId": "mt",
+        "chapter": 2,
+        "text": "«Cuando Jesús nació en Belén de Judea…»"
+      },
+      "note": "El lugar exacto del nacimiento del Mesías, anunciado siglos antes."
+    },
+    {
+      "cat": "nacimiento",
+      "theme": "Llamado de Egipto",
+      "prophecy": {
+        "ref": "Oseas 11:1",
+        "bookId": "os",
+        "chapter": 11,
+        "text": "«…y de Egipto llamé a mi hijo.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 2:15",
+        "bookId": "mt",
+        "chapter": 2,
+        "text": "«De Egipto llamé a mi Hijo.»"
+      },
+      "note": "La huida y el regreso del niño Jesús reflejan la historia de Israel."
+    },
+    {
+      "cat": "ministerio",
+      "theme": "Un mensajero prepara el camino",
+      "prophecy": {
+        "ref": "Malaquías 3:1",
+        "bookId": "mal",
+        "chapter": 3,
+        "text": "«He aquí, yo envío mi mensajero, el cual preparará el camino delante de mí.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 3:1",
+        "bookId": "mt",
+        "chapter": 3,
+        "text": "«En aquellos días vino Juan el Bautista predicando en el desierto…»"
+      },
+      "note": "Juan el Bautista es el precursor anunciado que prepara la venida del Señor."
+    },
+    {
+      "cat": "ministerio",
+      "theme": "Ungido para anunciar buenas nuevas",
+      "prophecy": {
+        "ref": "Isaías 61:1",
+        "bookId": "is",
+        "chapter": 61,
+        "text": "«El Espíritu de Jehová… me ha enviado a predicar buenas nuevas a los abatidos.»"
+      },
+      "fulfillment": {
+        "ref": "Lucas 4:18",
+        "bookId": "lc",
+        "chapter": 4,
+        "text": "«Hoy se ha cumplido esta Escritura delante de vosotros.»"
+      },
+      "note": "Jesús lee esta profecía en la sinagoga y declara que se cumple en Él."
+    },
+    {
+      "cat": "ministerio",
+      "theme": "Luz en Galilea",
+      "prophecy": {
+        "ref": "Isaías 9:2",
+        "bookId": "is",
+        "chapter": 9,
+        "text": "«El pueblo que andaba en tinieblas vio gran luz.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 4:16",
+        "bookId": "mt",
+        "chapter": 4,
+        "text": "«El pueblo asentado en tinieblas vio gran luz.»"
+      },
+      "note": "El ministerio de Jesús comienza precisamente en Galilea, como fue anunciado."
+    },
+    {
+      "cat": "ministerio",
+      "theme": "Enseñaría en parábolas",
+      "prophecy": {
+        "ref": "Salmos 78:2",
+        "bookId": "sal",
+        "chapter": 78,
+        "text": "«Abriré mi boca en proverbios; hablaré cosas escondidas desde tiempos antiguos.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 13:34",
+        "bookId": "mt",
+        "chapter": 13,
+        "text": "«Sin parábolas no les hablaba.»"
+      },
+      "note": "El método de enseñanza del Mesías estaba previsto en los Salmos."
+    },
+    {
+      "cat": "ministerio",
+      "theme": "Profeta como Moisés",
+      "prophecy": {
+        "ref": "Deuteronomio 18:15",
+        "bookId": "dt",
+        "chapter": 18,
+        "text": "«Profeta de en medio de ti… te levantará Jehová tu Dios; a él oiréis.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 3:22",
+        "bookId": "hch",
+        "chapter": 3,
+        "text": "«El Señor os levantará profeta… a él oiréis en todas las cosas.»"
+      },
+      "note": "Moisés mismo anunció a un Profeta mayor que vendría: Cristo."
+    },
+    {
+      "cat": "rechazo",
+      "theme": "El Rey humilde en un asno",
+      "prophecy": {
+        "ref": "Zacarías 9:9",
+        "bookId": "zac",
+        "chapter": 9,
+        "text": "«He aquí tu rey vendrá a ti… humilde, y cabalgando sobre un asno.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 21:5",
+        "bookId": "mt",
+        "chapter": 21,
+        "text": "«He aquí, tu Rey viene a ti, manso, y sentado sobre una asna…»"
+      },
+      "note": "La entrada triunfal cumple al detalle la profecía de Zacarías."
+    },
+    {
+      "cat": "rechazo",
+      "theme": "La piedra desechada",
+      "prophecy": {
+        "ref": "Salmos 118:22",
+        "bookId": "sal",
+        "chapter": 118,
+        "text": "«La piedra que desecharon los edificadores ha venido a ser cabeza del ángulo.»"
+      },
+      "fulfillment": {
+        "ref": "1 Pedro 2:7",
+        "bookId": "1pe",
+        "chapter": 2,
+        "text": "«La piedra que los edificadores desecharon… ha venido a ser la cabeza del ángulo.»"
+      },
+      "note": "El Mesías rechazado por su pueblo se convierte en el fundamento de todo."
+    },
+    {
+      "cat": "rechazo",
+      "theme": "Traicionado por un amigo",
+      "prophecy": {
+        "ref": "Salmos 41:9",
+        "bookId": "sal",
+        "chapter": 41,
+        "text": "«El que de mi pan comía, alzó contra mí el calcañar.»"
+      },
+      "fulfillment": {
+        "ref": "Juan 13:18",
+        "bookId": "jn",
+        "chapter": 13,
+        "text": "«El que come pan conmigo, levantó contra mí su calcañar.»"
+      },
+      "note": "La traición de Judas fue anunciada en los Salmos."
+    },
+    {
+      "cat": "rechazo",
+      "theme": "Vendido por treinta piezas de plata",
+      "prophecy": {
+        "ref": "Zacarías 11:12",
+        "bookId": "zac",
+        "chapter": 11,
+        "text": "«Pesaron por mi salario treinta piezas de plata.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 26:15",
+        "bookId": "mt",
+        "chapter": 26,
+        "text": "«…y ellos le asignaron treinta piezas de plata.»"
+      },
+      "note": "Hasta el precio exacto de la traición fue profetizado."
+    },
+    {
+      "cat": "muerte",
+      "theme": "El Siervo herido por nuestros pecados",
+      "prophecy": {
+        "ref": "Isaías 53:5",
+        "bookId": "is",
+        "chapter": 53,
+        "text": "«Mas él herido fue por nuestras rebeliones, molido por nuestros pecados.»"
+      },
+      "fulfillment": {
+        "ref": "1 Pedro 2:24",
+        "bookId": "1pe",
+        "chapter": 2,
+        "text": "«…quien llevó él mismo nuestros pecados en su cuerpo sobre el madero.»"
+      },
+      "note": "El capítulo cumbre de Isaías describe la cruz 700 años antes."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Como cordero mudo ante sus trasquiladores",
+      "prophecy": {
+        "ref": "Isaías 53:7",
+        "bookId": "is",
+        "chapter": 53,
+        "text": "«Como cordero fue llevado al matadero… enmudeció, y no abrió su boca.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 8:32",
+        "bookId": "hch",
+        "chapter": 8,
+        "text": "«Como oveja a la muerte fue llevado…»"
+      },
+      "note": "El silencio de Jesús ante sus acusadores cumple la profecía del Siervo."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Manos y pies horadados",
+      "prophecy": {
+        "ref": "Salmos 22:16",
+        "bookId": "sal",
+        "chapter": 22,
+        "text": "«Horadaron mis manos y mis pies.»"
+      },
+      "fulfillment": {
+        "ref": "Lucas 23:33",
+        "bookId": "lc",
+        "chapter": 23,
+        "text": "«…le crucificaron allí.»"
+      },
+      "note": "El Salmo 22 describe la crucifixión siglos antes de que existiera ese castigo."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Repartieron sus vestidos",
+      "prophecy": {
+        "ref": "Salmos 22:18",
+        "bookId": "sal",
+        "chapter": 22,
+        "text": "«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»"
+      },
+      "fulfillment": {
+        "ref": "Juan 19:24",
+        "bookId": "jn",
+        "chapter": 19,
+        "text": "«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»"
+      },
+      "note": "Los soldados cumplen, sin saberlo, la profecía al pie de la letra."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Ninguno de sus huesos sería quebrado",
+      "prophecy": {
+        "ref": "Salmos 34:20",
+        "bookId": "sal",
+        "chapter": 34,
+        "text": "«Él guarda todos sus huesos; ni uno de ellos será quebrantado.»"
+      },
+      "fulfillment": {
+        "ref": "Juan 19:36",
+        "bookId": "jn",
+        "chapter": 19,
+        "text": "«No será quebrado hueso suyo.»"
+      },
+      "note": "Como el cordero pascual, a Jesús no le quebraron ningún hueso."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Traspasado",
+      "prophecy": {
+        "ref": "Zacarías 12:10",
+        "bookId": "zac",
+        "chapter": 12,
+        "text": "«…mirarán a mí, a quien traspasaron.»"
+      },
+      "fulfillment": {
+        "ref": "Juan 19:34",
+        "bookId": "jn",
+        "chapter": 19,
+        "text": "«Uno de los soldados le abrió el costado con una lanza.»"
+      },
+      "note": "La lanza que atraviesa a Jesús cumple la profecía de Zacarías."
+    },
+    {
+      "cat": "muerte",
+      "theme": "Sepultado con los ricos",
+      "prophecy": {
+        "ref": "Isaías 53:9",
+        "bookId": "is",
+        "chapter": 53,
+        "text": "«Y se dispuso con los impíos su sepultura, mas con los ricos fue en su muerte.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 27:57",
+        "bookId": "mt",
+        "chapter": 27,
+        "text": "«…un hombre rico de Arimatea… puso en su sepulcro nuevo.»"
+      },
+      "note": "José de Arimatea, hombre rico, le da sepultura como fue anunciado."
+    },
+    {
+      "cat": "resurreccion",
+      "theme": "No vería corrupción",
+      "prophecy": {
+        "ref": "Salmos 16:10",
+        "bookId": "sal",
+        "chapter": 16,
+        "text": "«No dejarás… que tu santo vea corrupción.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 2:31",
+        "bookId": "hch",
+        "chapter": 2,
+        "text": "«…que su alma no fue dejada en el Hades, ni su carne vio corrupción.»"
+      },
+      "note": "David profetiza la resurrección del Mesías antes de la corrupción del cuerpo."
+    },
+    {
+      "cat": "resurreccion",
+      "theme": "La señal de Jonás",
+      "prophecy": {
+        "ref": "Jonás 1:17",
+        "bookId": "jon",
+        "chapter": 1,
+        "text": "«Y estuvo Jonás en el vientre del pez tres días y tres noches.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 12:40",
+        "bookId": "mt",
+        "chapter": 12,
+        "text": "«…así estará el Hijo del Hombre… tres días y tres noches.»"
+      },
+      "note": "Jonás en el pez prefigura la muerte y resurrección de Cristo."
+    },
+    {
+      "cat": "resurreccion",
+      "theme": "Sentado a la diestra de Dios",
+      "prophecy": {
+        "ref": "Salmos 110:1",
+        "bookId": "sal",
+        "chapter": 110,
+        "text": "«Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 2:34",
+        "bookId": "hch",
+        "chapter": 2,
+        "text": "«Siéntate a mi diestra…»"
+      },
+      "note": "El salmo más citado en el NT: la exaltación del Mesías a la diestra del Padre."
+    },
+    {
+      "cat": "resurreccion",
+      "theme": "Derramamiento del Espíritu",
+      "prophecy": {
+        "ref": "Joel 2:28",
+        "bookId": "jl",
+        "chapter": 2,
+        "text": "«Derramaré mi Espíritu sobre toda carne.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 2:17",
+        "bookId": "hch",
+        "chapter": 2,
+        "text": "«Derramaré de mi Espíritu sobre toda carne.»"
+      },
+      "note": "Pentecostés cumple la promesa de Joel sobre el Espíritu Santo."
+    },
+    {
+      "cat": "reino",
+      "theme": "El Hijo del Hombre y su reino eterno",
+      "prophecy": {
+        "ref": "Daniel 7:13",
+        "bookId": "dn",
+        "chapter": 7,
+        "text": "«…con las nubes del cielo venía uno como un hijo de hombre.»"
+      },
+      "fulfillment": {
+        "ref": "Mateo 26:64",
+        "bookId": "mt",
+        "chapter": 26,
+        "text": "«Veréis al Hijo del Hombre… viniendo en las nubes del cielo.»"
+      },
+      "note": "El título favorito de Jesús viene de la visión de Daniel del reino que no acaba."
+    },
+    {
+      "cat": "reino",
+      "theme": "El nuevo pacto",
+      "prophecy": {
+        "ref": "Jeremías 31:31",
+        "bookId": "jer",
+        "chapter": 31,
+        "text": "«…haré nuevo pacto con la casa de Israel.»"
+      },
+      "fulfillment": {
+        "ref": "Lucas 22:20",
+        "bookId": "lc",
+        "chapter": 22,
+        "text": "«Esta copa es el nuevo pacto en mi sangre.»"
+      },
+      "note": "En la última cena, Jesús inaugura el nuevo pacto anunciado por Jeremías."
+    },
+    {
+      "cat": "reino",
+      "theme": "Luz para las naciones",
+      "prophecy": {
+        "ref": "Isaías 49:6",
+        "bookId": "is",
+        "chapter": 49,
+        "text": "«Te di por luz de las naciones, para que seas mi salvación hasta lo postrero de la tierra.»"
+      },
+      "fulfillment": {
+        "ref": "Hechos 13:47",
+        "bookId": "hch",
+        "chapter": 13,
+        "text": "«Te he puesto para luz de los gentiles…»"
+      },
+      "note": "El evangelio que alcanza a todos los pueblos cumple esta promesa."
+    },
+    {
+      "cat": "reino",
+      "theme": "Sacerdote para siempre",
+      "prophecy": {
+        "ref": "Salmos 110:4",
+        "bookId": "sal",
+        "chapter": 110,
+        "text": "«Tú eres sacerdote para siempre según el orden de Melquisedec.»"
+      },
+      "fulfillment": {
+        "ref": "Hebreos 5:6",
+        "bookId": "he",
+        "chapter": 5,
+        "text": "«Tú eres sacerdote para siempre, según el orden de Melquisedec.»"
+      },
+      "note": "Cristo es Rey y, a la vez, Sumo Sacerdote eterno que intercede por nosotros."
+    }
+  ]
+}
