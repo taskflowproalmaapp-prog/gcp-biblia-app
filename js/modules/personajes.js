@@ -2,7 +2,7 @@
 (function() {
   const page = document.getElementById('page-personajes');
   let DATA = [], filtered = [], active = null;
-  let filterT = 'ALL', filterG = 'ALL', searchQ = '';
+  let _filterT = 'ALL', filterG = 'ALL', searchQ = '';
 
   const style = document.createElement('style');
   style.textContent = `
@@ -63,7 +63,7 @@
     const count = document.getElementById('chars-count');
     if (!list) return;
     let items = DATA;
-    if (filterT !== 'ALL') items = items.filter(p => p.testament === filterT);
+    if (_filterT !== 'ALL') items = items.filter(p => p.testament === _filterT);
     if (searchQ) { const q = searchQ.toLowerCase(); items = items.filter(p => p.name.toLowerCase().includes(q)); }
     filtered = items;
     if (count) count.textContent = `${items.length} personajes`;
@@ -100,7 +100,7 @@
 
   function search(q) { searchQ = q; renderList(); }
   function filterT(t) {
-    filterT = t;
+    _filterT = t;
     document.querySelectorAll('.chars-filter-btn').forEach((b,i) => b.classList.toggle('active', ['ALL','AT','NT'][i] === t));
     renderList();
   }
