@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generar 200 Profecías — Admin</title>
+<style>
+  body{background:#0B0E14;color:#F5F0E8;font-family:system-ui;padding:20px;max-width:1000px;margin:0 auto;}
+  h1{color:#D4AF5A;margin-bottom:8px;}
+  p{color:#8892a4;margin-bottom:20px;}
+  .btn{background:#D4AF5A;color:#0B0E14;border:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-right:10px;margin-bottom:10px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-outline{background:none;border:1px solid rgba(212,175,90,.4);color:#D4AF5A;}
+  .progress{background:#131720;border-radius:10px;padding:20px;margin-bottom:20px;}
+  .progress-bar-wrap{background:rgba(212,175,90,.1);border-radius:4px;height:8px;margin:12px 0;}
+  .progress-bar{background:#D4AF5A;height:100%;border-radius:4px;transition:width .3s;}
+  .stats{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap;}
+  .stat{background:#131720;border-radius:8px;padding:12px 16px;text-align:center;min-width:80px;}
+  .stat-num{font-size:24px;font-weight:700;color:#D4AF5A;}
+  .stat-label{font-size:12px;color:#8892a4;}
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:20px;}
+  .group{background:#131720;border:1px solid rgba(212,175,90,.15);border-radius:10px;padding:14px;}
+  .group-title{color:#D4AF5A;font-weight:700;font-size:14px;margin-bottom:8px;}
+  .group-items{display:flex;flex-direction:column;gap:4px;}
+  .item{font-size:12px;color:#8892a4;padding:4px 8px;border-radius:4px;display:flex;align-items:center;gap:6px;}
+  .item.done{color:#81c784;background:rgba(100,200,100,.05);}
+  .item.error{color:#e57373;background:rgba(255,100,100,.05);}
+  .item.active{color:#D4AF5A;background:rgba(212,175,90,.08);}
+  .output{background:#131720;border:1px solid rgba(212,175,90,.2);border-radius:8px;padding:16px;font-size:12px;font-family:monospace;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<h1>📜 Generador de 200 Profecías Mesiánicas</h1>
+<p>Genera los 200 pares de profecías organizados en 12 grupos temáticos con análisis teológico completo. Cada profecía tendrá: contexto histórico, significado AT, cumplimiento en Cristo, impacto teológico, aplicación práctica y verdad central.</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-label">Generadas</div></div>
+  <div class="stat"><div class="stat-num" id="s-error">0</div><div class="stat-label">Errores</div></div>
+  <div class="stat"><div class="stat-num" id="s-pending">200</div><div class="stat-label">Pendientes</div></div>
+  <div class="stat"><div class="stat-num" id="s-time">—</div><div class="stat-label">Tiempo restante</div></div>
+</div>
+
+<div class="progress">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+    <span id="p-label" style="color:#D4AF5A;font-weight:600">Listo para generar</span>
+    <span id="p-pct" style="color:#8892a4">0%</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="p-bar" style="width:0%"></div></div>
+  <div style="color:#8892a4;font-size:13px" id="p-text">Haz clic en "Generar Todas" para comenzar. Tomará ~30-40 minutos.</div>
+</div>
+
+<button class="btn" id="btn-start" onclick="start()">▶ Generar Todas (200 profecías)</button>
+<button class="btn btn-outline" id="btn-stop" onclick="stop()" disabled>⏹ Detener</button>
+<button class="btn btn-outline" onclick="download()" id="btn-dl" disabled>⬇ Descargar profecias.json</button>
+<button class="btn btn-outline" onclick="clearCache()">🗑 Limpiar caché</button>
+
+<div class="groups" id="groups"></div>
+
+<div id="out-section" style="display:none">
+  <h3 style="color:#D4AF5A;margin-bottom:8px">📄 JSON generado</h3>
+  <div class="output" id="output"></div>
+  <button class="btn" onclick="copyAll()">📋 Copiar JSON completo</button>
+</div>
+
+<script>
+const GROUPS = [
+  {
+    key: 'nacimiento', label: 'Nacimiento y Origen del Mesías',
+    intro: 'Las profecías sobre el nacimiento del Mesías revelan que Dios planificó cada detalle de la venida de Cristo siglos antes. Desde la ciudad exacta de su nacimiento hasta la naturaleza sobrenatural de su concepción, estas profecías demuestran que Jesús no fue un personaje histórico ordinario sino el cumplimiento del plan eterno de Dios.',
+    pairs: [
+      {theme:'La simiente de la mujer',p:{ref:'Génesis 3:15',bk:'gn',ch:3,text:'«Esta te herirá en la cabeza, y tú le herirás en el calcañar.»'},f:{ref:'Gálatas 4:4',bk:'ga',ch:4,text:'«Cuando vino el cumplimiento del tiempo, Dios envió a su Hijo, nacido de mujer.»'}},
+      {theme:'Descendiente de Abraham',p:{ref:'Génesis 12:3',bk:'gn',ch:12,text:'«En ti serán benditas todas las familias de la tierra.»'},f:{ref:'Mateo 1:1',bk:'mt',ch:1,text:'«Libro de la genealogía de Jesucristo, hijo de David, hijo de Abraham.»'}},
+      {theme:'De la tribu de Judá',p:{ref:'Génesis 49:10',bk:'gn',ch:49,text:'«No será quitado el cetro de Judá…hasta que venga Siloh.»'},f:{ref:'Lucas 3:33',bk:'lc',ch:3,text:'«…hijo de Aminadab, hijo de Aram, hijo de Esrom, hijo de Fares, hijo de Judá.»'}},
+      {theme:'Nacido en Belén',p:{ref:'Miqueas 5:2',bk:'mi',ch:5,text:'«Pero tú, Belén Efrata…de ti me saldrá el que será Señor en Israel.»'},f:{ref:'Lucas 2:4-7',bk:'lc',ch:2,text:'«Y José subió…a Belén…y dio a luz a su hijo primogénito.»'}},
+      {theme:'Nacido de una virgen',p:{ref:'Isaías 7:14',bk:'is',ch:7,text:'«He aquí que la virgen concebirá, y dará a luz un hijo, y llamará su nombre Emanuel.»'},f:{ref:'Mateo 1:22-23',bk:'mt',ch:1,text:'«Todo esto aconteció para que se cumpliese lo dicho por el Señor por medio del profeta.»'}},
+      {theme:'Huida a Egipto',p:{ref:'Oseas 11:1',bk:'os',ch:11,text:'«De Egipto llamé a mi hijo.»'},f:{ref:'Mateo 2:14-15',bk:'mt',ch:2,text:'«Y él, despertando, tomó de noche al niño y a su madre, y se fue a Egipto.»'}},
+      {theme:'La matanza de los inocentes',p:{ref:'Jeremías 31:15',bk:'jer',ch:31,text:'«Voz fue oída en Ramá…Raquel que llora a sus hijos.»'},f:{ref:'Mateo 2:16-18',bk:'mt',ch:2,text:'«Entonces Herodes…mató a todos los niños menores de dos años.»'}},
+      {theme:'Llamado Nazareno',p:{ref:'Isaías 11:1',bk:'is',ch:11,text:'«Saldrá una vara del tronco de Isaí, y un vástago retoñará de sus raíces.»'},f:{ref:'Mateo 2:23',bk:'mt',ch:2,text:'«Y vino y habitó en la ciudad que se llama Nazaret, para que se cumpliese lo que fue dicho por los profetas, que habría de ser llamado nazareno.»'}},
+      {theme:'Preexistencia eterna',p:{ref:'Miqueas 5:2',bk:'mi',ch:5,text:'«…sus salidas son desde el principio, desde los días de la eternidad.»'},f:{ref:'Juan 1:1',bk:'jn',ch:1,text:'«En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios.»'}},
+      {theme:'Adoración por los magos',p:{ref:'Salmos 72:10',bk:'sal',ch:72,text:'«Los reyes de Tarsis y de las costas traerán presentes; los reyes de Sabá y de Seba ofrecerán dones.»'},f:{ref:'Mateo 2:1-2',bk:'mt',ch:2,text:'«Unos magos del oriente llegaron a Jerusalén, diciendo: ¿Dónde está el rey de los judíos, que ha nacido?»'}},
+      {theme:'Su nombre Emmanuel',p:{ref:'Isaías 7:14',bk:'is',ch:7,text:'«…y llamará su nombre Emanuel.»'},f:{ref:'Mateo 1:23',bk:'mt',ch:1,text:'«…que traducido es: Dios con nosotros.»'}},
+      {theme:'Descendiente de Isaac',p:{ref:'Génesis 17:19',bk:'gn',ch:17,text:'«…estableceré mi pacto con él como pacto perpetuo para sus descendientes.»'},f:{ref:'Mateo 1:2',bk:'mt',ch:1,text:'«Abraham engendró a Isaac, Isaac a Jacob, Jacob a Judá y a sus hermanos.»'}},
+      {theme:'Descendiente de Jacob',p:{ref:'Números 24:17',bk:'nm',ch:24,text:'«Saldrá ESTRELLA de Jacob, y se levantará cetro de Israel.»'},f:{ref:'Mateo 1:2',bk:'mt',ch:1,text:'«…Isaac a Jacob, Jacob a Judá y a sus hermanos.»'}},
+      {theme:'Presentado en el templo',p:{ref:'Malaquías 3:1',bk:'mal',ch:3,text:'«…y vendrá súbitamente a su templo el Señor a quien vosotros buscáis.»'},f:{ref:'Lucas 2:27-28',bk:'lc',ch:2,text:'«Y cuando los padres del niño Jesús lo trajeron al templo para hacer por él conforme al rito de la ley, él le tomó en sus brazos.»'}},
+      {theme:'El gozo del ángel anunciador',p:{ref:'Isaías 52:7',bk:'is',ch:52,text:'«¡Cuán hermosos son sobre los montes los pies del que trae alegres nuevas!»'},f:{ref:'Lucas 2:10',bk:'lc',ch:2,text:'«Pero el ángel les dijo: No temáis; porque he aquí os doy nuevas de gran gozo, que será para todo el pueblo.»'}},
+      {theme:'Estrella de Jacob',p:{ref:'Números 24:17',bk:'nm',ch:24,text:'«Saldrá ESTRELLA de Jacob, y se levantará cetro de Israel.»'},f:{ref:'Mateo 2:2',bk:'mt',ch:2,text:'«¿Dónde está el rey de los judíos, que ha nacido? Porque su estrella hemos visto en el oriente.»'}},
+      {theme:'Dios lo sacará de Egipto',p:{ref:'Números 24:8',bk:'nm',ch:24,text:'«Dios le sacó de Egipto.»'},f:{ref:'Mateo 2:21',bk:'mt',ch:2,text:'«Y él, despertando, tomó al niño y a su madre, y vino a tierra de Israel.»'}}
+    ]
+  },
+  {
+    key: 'linaje', label: 'Familia, Linaje y Genealogía',
+    intro: 'La genealogía del Mesías no era un detalle menor — era la prueba legal de su derecho al trono de David y su cumplimiento de las promesas hechas a los patriarcas. Estas profecías revelan cómo Dios preservó cuidadosamente la línea mesiánica a través de siglos de historia, guerras y exilios.',
+    pairs: [
+      {theme:'Descendiente de David',p:{ref:'2 Samuel 7:12-13',bk:'2sm',ch:7,text:'«…levantaré después de ti a uno de tu linaje…y afirmaré su trono eternamente.»'},f:{ref:'Mateo 1:1',bk:'mt',ch:1,text:'«Libro de la genealogía de Jesucristo, hijo de David.»'}},
+      {theme:'Heredero del trono de David',p:{ref:'Isaías 9:7',bk:'is',ch:9,text:'«Lo dilatado de su imperio y la paz no tendrán límite, sobre el trono de David.»'},f:{ref:'Lucas 1:32',bk:'lc',ch:1,text:'«El Señor Dios le dará el trono de David su padre.»'}},
+      {theme:'Del linaje real de Salomón',p:{ref:'2 Samuel 7:13',bk:'2sm',ch:7,text:'«Él edificará casa a mi nombre.»'},f:{ref:'Mateo 1:6',bk:'mt',ch:1,text:'«…David engendró a Salomón de la que fue mujer de Urías.»'}},
+      {theme:'Hijo de Dios',p:{ref:'Salmos 2:7',bk:'sal',ch:2,text:'«Mi decreto es: Jehová me ha dicho: Mi hijo eres tú; yo te engendré hoy.»'},f:{ref:'Mateo 3:17',bk:'mt',ch:3,text:'«Y hubo una voz de los cielos, que decía: Este es mi Hijo amado, en quien tengo complacencia.»'}},
+      {theme:'Primogénito de Dios',p:{ref:'Salmos 89:27',bk:'sal',ch:89,text:'«Yo también le pondré por primogénito, el más excelso de los reyes de la tierra.»'},f:{ref:'Colosenses 1:15',bk:'col',ch:1,text:'«Él es la imagen del Dios invisible, el primogénito de toda creación.»'}},
+      {theme:'Su nombre eterno',p:{ref:'Salmos 72:17',bk:'sal',ch:72,text:'«Será su nombre para siempre; se perpetuará su nombre mientras dure el sol.»'},f:{ref:'Efesios 1:21',bk:'ef',ch:1,text:'«…sobre todo nombre que se nombra, no sólo en este siglo, sino también en el venidero.»'}},
+      {theme:'Rama justa de David',p:{ref:'Jeremías 23:5',bk:'jer',ch:23,text:'«He aquí que vienen días, dice Jehová, en que levantaré a David renuevo justo.»'},f:{ref:'Lucas 1:31-33',bk:'lc',ch:1,text:'«…y el Señor Dios le dará el trono de David su padre; y reinará sobre la casa de Jacob para siempre.»'}},
+      {theme:'El Siervo elegido',p:{ref:'Isaías 42:1',bk:'is',ch:42,text:'«He aquí mi siervo, yo le sostendré; mi escogido, en quien mi alma tiene contentamiento.»'},f:{ref:'Mateo 12:18',bk:'mt',ch:12,text:'«He aquí mi siervo, a quien he escogido; mi Amado, en quien se agrada mi alma.»'}},
+      {theme:'Sucesor de Moisés',p:{ref:'Deuteronomio 18:15',bk:'dt',ch:18,text:'«Profeta de en medio de ti, de tus hermanos, como yo, te levantará Jehová tu Dios.»'},f:{ref:'Hechos 3:22',bk:'hch',ch:3,text:'«Porque Moisés dijo a los padres: El Señor vuestro Dios os levantará profeta de entre vuestros hermanos, como a mí.»'}},
+      {theme:'Sacerdote eterno',p:{ref:'Salmos 110:4',bk:'sal',ch:110,text:'«Tú eres sacerdote para siempre según el orden de Melquisedec.»'},f:{ref:'Hebreos 5:6',bk:'heb',ch:5,text:'«Como también dice en otro lugar: Tú eres sacerdote para siempre, según el orden de Melquisedec.»'}},
+      {theme:'Señor de David',p:{ref:'Salmos 110:1',bk:'sal',ch:110,text:'«Jehová dijo a mi Señor: Siéntate a mi diestra.»'},f:{ref:'Mateo 22:44',bk:'mt',ch:22,text:'«Dijo el Señor a mi Señor: Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado de tus pies.»'}},
+      {theme:'De Efrata la pequeña',p:{ref:'Miqueas 5:2',bk:'mi',ch:5,text:'«…aunque eres pequeña entre los clanes de Judá, de ti saldrá…»'},f:{ref:'Juan 7:42',bk:'jn',ch:7,text:'«¿No dice la Escritura que del linaje de David, y de la aldea de Belén, de donde era David, ha de venir el Cristo?»'}},
+      {theme:'De la casa de Isaí',p:{ref:'Isaías 11:1',bk:'is',ch:11,text:'«Saldrá una vara del tronco de Isaí, y un vástago retoñará de sus raíces.»'},f:{ref:'Lucas 3:32',bk:'lc',ch:3,text:'«…hijo de Isaí, hijo de Obed, hijo de Booz, hijo de Salmón.»'}},
+      {theme:'El que viene en nombre del Señor',p:{ref:'Salmos 118:26',bk:'sal',ch:118,text:'«Bendito el que viene en el nombre de Jehová.»'},f:{ref:'Juan 12:13',bk:'jn',ch:12,text:'«¡Bendito el que viene en el nombre del Señor, el Rey de Israel!»'}},
+      {theme:'Señor antes que David',p:{ref:'Salmos 110:1',bk:'sal',ch:110,text:'«Jehová dijo a mi Señor: Siéntate a mi diestra.»'},f:{ref:'Mateo 22:43-45',bk:'mt',ch:22,text:'«¿Cómo, pues, David en el Espíritu le llama Señor?»'}}
+    ]
+  },
+  {
+    key: 'caracter', label: 'Vida y Carácter del Mesías',
+    intro: 'Los profetas no solo predijeron dónde nacería el Mesías sino también cómo sería: su carácter, su personalidad y sus cualidades únicas. Estas profecías revelan que Jesús no fue simplemente un maestro moral sino el reflejo perfecto del carácter de Dios hecho hombre.',
+    pairs: [
+      {theme:'Lleno del Espíritu Santo',p:{ref:'Isaías 11:2',bk:'is',ch:11,text:'«Y reposará sobre él el Espíritu de Jehová; espíritu de sabiduría y de inteligencia.»'},f:{ref:'Lucas 4:1',bk:'lc',ch:4,text:'«Jesús, lleno del Espíritu Santo, volvió del Jordán.»'}},
+      {theme:'Sin pecado',p:{ref:'Isaías 53:9',bk:'is',ch:53,text:'«…aunque nunca hizo maldad, ni hubo engaño en su boca.»'},f:{ref:'Hebreos 4:15',bk:'heb',ch:4,text:'«…uno que fue tentado en todo según nuestra semejanza, pero sin pecado.»'}},
+      {theme:'Manso y humilde',p:{ref:'Zacarías 9:9',bk:'zac',ch:9,text:'«…justo y salvador, humilde, montado sobre un asno.»'},f:{ref:'Mateo 11:29',bk:'mt',ch:11,text:'«Llevad mi yugo sobre vosotros…porque soy manso y humilde de corazón.»'}},
+      {theme:'Lleno de gracia y verdad',p:{ref:'Salmos 45:2',bk:'sal',ch:45,text:'«La gracia se derramó en tus labios.»'},f:{ref:'Juan 1:14',bk:'jn',ch:1,text:'«Y aquel Verbo fue hecho carne…lleno de gracia y de verdad.»'}},
+      {theme:'Celo por la casa de Dios',p:{ref:'Salmos 69:9',bk:'sal',ch:69,text:'«Porque me consumió el celo de tu casa.»'},f:{ref:'Juan 2:17',bk:'jn',ch:2,text:'«Entonces sus discípulos recordaron que está escrito: El celo de tu casa me consume.»'}},
+      {theme:'Compasivo con los pobres',p:{ref:'Isaías 61:1',bk:'is',ch:61,text:'«El Espíritu de Jehová el Señor está sobre mí…me ha enviado a predicar buenas nuevas a los abatidos.»'},f:{ref:'Lucas 4:18',bk:'lc',ch:4,text:'«El Espíritu del Señor está sobre mí, por cuanto me ha ungido para dar buenas nuevas a los pobres.»'}},
+      {theme:'Obediente hasta la muerte',p:{ref:'Salmos 40:7-8',bk:'sal',ch:40,text:'«He aquí, vengo…el hacer tu voluntad, Dios mío, me ha agradado.»'},f:{ref:'Filipenses 2:8',bk:'flp',ch:2,text:'«Se humilló a sí mismo, haciéndose obediente hasta la muerte, y muerte de cruz.»'}},
+      {theme:'Juez justo',p:{ref:'Isaías 11:3-4',bk:'is',ch:11,text:'«…no juzgará según la vista de sus ojos, ni argüirá por lo que oigan sus oídos; sino que juzgará con justicia a los pobres.»'},f:{ref:'Juan 5:30',bk:'jn',ch:5,text:'«No puedo yo hacer nada por mí mismo; según oigo, así juzgo; y mi juicio es justo.»'}},
+      {theme:'Luz para los gentiles',p:{ref:'Isaías 42:6',bk:'is',ch:42,text:'«…te pondré por pacto al pueblo, por luz de las naciones.»'},f:{ref:'Juan 8:12',bk:'jn',ch:8,text:'«Yo soy la luz del mundo; el que me sigue, no andará en tinieblas.»'}},
+      {theme:'El Buen Pastor',p:{ref:'Ezequiel 34:23',bk:'ez',ch:34,text:'«Y levantaré sobre ellas a un pastor, y él las apacentará; a mi siervo David, él las apacentará.»'},f:{ref:'Juan 10:11',bk:'jn',ch:10,text:'«Yo soy el buen pastor; el buen pastor su vida da por las ovejas.»'}},
+      {theme:'Piedra angular rechazada',p:{ref:'Salmos 118:22',bk:'sal',ch:118,text:'«La piedra que desecharon los edificadores ha venido a ser cabeza del ángulo.»'},f:{ref:'Mateo 21:42',bk:'mt',ch:21,text:'«¿Nunca leísteis en las Escrituras: La piedra que desecharon los edificadores, esta fue hecha cabeza del ángulo?»'}},
+      {theme:'Piedra de tropiezo',p:{ref:'Isaías 8:14',bk:'is',ch:8,text:'«Entonces él será por santuario; pero a las dos casas de Israel, por piedra para tropezar.»'},f:{ref:'Romanos 9:33',bk:'ro',ch:9,text:'«He aquí pongo en Sion piedra de tropiezo y roca de caída; y el que creyere en él, no será avergonzado.»'}},
+      {theme:'La vid verdadera',p:{ref:'Salmos 80:8',bk:'sal',ch:80,text:'«Hiciste venir una vid de Egipto; echaste las naciones, y la plantaste.»'},f:{ref:'Juan 15:1',bk:'jn',ch:15,text:'«Yo soy la vid verdadera, y mi Padre es el labrador.»'}},
+      {theme:'Pan de vida',p:{ref:'Salmos 78:24',bk:'sal',ch:78,text:'«…e hizo llover sobre ellos maná para que comiesen, y les dio trigo de los cielos.»'},f:{ref:'Juan 6:35',bk:'jn',ch:6,text:'«Yo soy el pan de vida; el que a mí viene, nunca tendrá hambre.»'}},
+      {theme:'Señor de la gloria',p:{ref:'Salmos 24:7-8',bk:'sal',ch:24,text:'«Alzad, oh puertas, vuestras cabezas…¿Quién es este Rey de gloria? Jehová el fuerte y valiente.»'},f:{ref:'1 Corintios 2:8',bk:'1co',ch:2,text:'«La sabiduría que ninguno de los príncipes de este siglo conoció; porque si la hubieran conocido, nunca habrían crucificado al Señor de gloria.»'}},
+      {theme:'Amor perfecto',p:{ref:'Cantares 5:16',bk:'cnt',ch:5,text:'«Su paladar, dulcísimo, y todo él codiciable. Tal es mi amado, tal es mi amigo.»'},f:{ref:'Juan 15:13',bk:'jn',ch:15,text:'«Nadie tiene mayor amor que este, que uno ponga su vida por sus amigos.»'}},
+      {theme:'El que perdona pecados',p:{ref:'Isaías 43:25',bk:'is',ch:43,text:'«Yo, yo soy el que borro tus rebeliones por amor de mí mismo.»'},f:{ref:'Marcos 2:10',bk:'mr',ch:2,text:'«Pues para que sepáis que el Hijo del Hombre tiene potestad en la tierra para perdonar pecados.»'}},
+      {theme:'Resucitador de muertos',p:{ref:'Isaías 26:19',bk:'is',ch:26,text:'«Tus muertos vivirán; sus cadáveres resucitarán.»'},f:{ref:'Juan 11:43-44',bk:'jn',ch:11,text:'«…clamó a gran voz: ¡Lázaro, ven fuera! Y el que había muerto salió.»'}},
+      {theme:'El que da agua de vida',p:{ref:'Isaías 55:1',bk:'is',ch:55,text:'«A todos los sedientos: Venid a las aguas.»'},f:{ref:'Juan 4:14',bk:'jn',ch:4,text:'«Mas el que bebiere del agua que yo le daré, no tendrá sed jamás.»'}},
+      {theme:'Anunció el año de gracia',p:{ref:'Isaías 61:2',bk:'is',ch:61,text:'«A proclamar el año de la buena voluntad de Jehová.»'},f:{ref:'Lucas 4:21',bk:'lc',ch:4,text:'«Hoy se ha cumplido esta Escritura delante de vosotros.»'}},
+      {theme:'El que sana los corazones',p:{ref:'Salmos 147:3',bk:'sal',ch:147,text:'«Él sana a los quebrantados de corazón, y venda sus heridas.»'},f:{ref:'Lucas 4:18',bk:'lc',ch:4,text:'«…a sanar a los quebrantados de corazón.»'}}
+    ]
+  },
+  {
+    key: 'ministerio', label: 'Su Ministerio y Milagros',
+    intro: 'Las profecías sobre el ministerio del Mesías son extraordinariamente específicas: predicaría en parábolas, sanaría enfermos, liberaría cautivos y traería buenas nuevas a los pobres. Jesús no solo enseñó estas cosas sino que las realizó, y en cada acto señaló a las Escrituras que se cumplían.',
+    pairs: [
+      {theme:'Precedido por Juan el Bautista',p:{ref:'Malaquías 3:1',bk:'mal',ch:3,text:'«He aquí, yo envío mi mensajero, el cual preparará el camino delante de mí.»'},f:{ref:'Marcos 1:2-4',bk:'mr',ch:1,text:'«…He aquí yo envío mi mensajero delante de tu faz…Juan bautizaba en el desierto.»'}},
+      {theme:'Bautismo y unción',p:{ref:'Isaías 61:1',bk:'is',ch:61,text:'«El Espíritu de Jehová el Señor está sobre mí, porque me ungió Jehová.»'},f:{ref:'Mateo 3:16',bk:'mt',ch:3,text:'«Y Jesús, después que fue bautizado, subió luego del agua; y he aquí los cielos le fueron abiertos.»'}},
+      {theme:'Ministerio en Galilea',p:{ref:'Isaías 9:1-2',bk:'is',ch:9,text:'«El pueblo que andaba en tinieblas vio gran luz.»'},f:{ref:'Mateo 4:13-16',bk:'mt',ch:4,text:'«…vino y habitó en Capernaum…para que se cumpliese lo dicho por el profeta Isaías.»'}},
+      {theme:'Enseñó en parábolas',p:{ref:'Salmos 78:2',bk:'sal',ch:78,text:'«Abriré mi boca en proverbios; hablaré cosas escondidas desde tiempos antiguos.»'},f:{ref:'Mateo 13:34-35',bk:'mt',ch:13,text:'«Todo esto habló Jesús por parábolas…para que se cumpliese lo dicho por el profeta.»'}},
+      {theme:'Sanó a los ciegos',p:{ref:'Isaías 35:5',bk:'is',ch:35,text:'«Entonces los ojos de los ciegos serán abiertos.»'},f:{ref:'Mateo 9:27-30',bk:'mt',ch:9,text:'«Y siguiéndole dos ciegos, daban voces, diciendo: ¡Ten misericordia de nosotros, Hijo de David!…y se abrieron sus ojos.»'}},
+      {theme:'Sanó a los sordos',p:{ref:'Isaías 35:5',bk:'is',ch:35,text:'«…y los oídos de los sordos se abrirán.»'},f:{ref:'Marcos 7:35',bk:'mr',ch:7,text:'«Al momento fueron abiertos sus oídos, y se desató la ligadura de su lengua.»'}},
+      {theme:'Sanó a los cojos',p:{ref:'Isaías 35:6',bk:'is',ch:35,text:'«Entonces el cojo saltará como un ciervo.»'},f:{ref:'Mateo 11:5',bk:'mt',ch:11,text:'«Los ciegos ven, los cojos andan, los leprosos son limpiados.»'}},
+      {theme:'Liberó a los oprimidos',p:{ref:'Isaías 61:1',bk:'is',ch:61,text:'«…a publicar libertad a los cautivos, y a los presos apertura de la cárcel.»'},f:{ref:'Lucas 4:18-19',bk:'lc',ch:4,text:'«…a pregonar libertad a los cautivos, y vista a los ciegos; a poner en libertad a los oprimidos.»'}},
+      {theme:'Anunció el año de gracia',p:{ref:'Isaías 61:2',bk:'is',ch:61,text:'«A proclamar el año de la buena voluntad de Jehová.»'},f:{ref:'Lucas 4:21',bk:'lc',ch:4,text:'«…Hoy se ha cumplido esta Escritura delante de vosotros.»'}},
+      {theme:'Comió con pecadores',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…con los pecadores fue contado.»'},f:{ref:'Lucas 15:2',bk:'lc',ch:15,text:'«Y los fariseos y los escribas murmuraban, diciendo: Este a los pecadores recibe, y con ellos come.»'}},
+      {theme:'Predicó las buenas nuevas',p:{ref:'Isaías 61:1',bk:'is',ch:61,text:'«…me ha enviado a predicar buenas nuevas a los abatidos.»'},f:{ref:'Lucas 7:22',bk:'lc',ch:7,text:'«…a los pobres es anunciado el evangelio.»'}},
+      {theme:'Realizó señales y prodigios',p:{ref:'Isaías 8:18',bk:'is',ch:8,text:'«He aquí, yo y los hijos que me dio Jehová somos por señales y presagios.»'},f:{ref:'Juan 20:30-31',bk:'jn',ch:20,text:'«Hizo además Jesús muchas otras señales…las cuales no están escritas en este libro.»'}},
+      {theme:'Entró en el templo',p:{ref:'Hageo 2:7',bk:'hag',ch:2,text:'«…vendrá el Deseado de todas las naciones; y llenaré de gloria esta casa.»'},f:{ref:'Mateo 21:12',bk:'mt',ch:21,text:'«Y entró Jesús en el templo de Dios.»'}},
+      {theme:'Los niños le alabaron',p:{ref:'Salmos 8:2',bk:'sal',ch:8,text:'«De la boca de los niños y de los que maman, fundaste la fortaleza.»'},f:{ref:'Mateo 21:15-16',bk:'mt',ch:21,text:'«Pero los principales sacerdotes y los escribas…se indignaron…Mas Jesús les dijo: ¿Nunca leísteis: De la boca de los niños y de los que maman perfeccionaste la alabanza?»'}},
+      {theme:'Enseñó con autoridad',p:{ref:'Deuteronomio 18:18',bk:'dt',ch:18,text:'«…profeta les levantaré…pondré mis palabras en su boca.»'},f:{ref:'Mateo 7:29',bk:'mt',ch:7,text:'«Porque les enseñaba como quien tiene autoridad, y no como los escribas.»'}},
+      {theme:'Resucitó muertos',p:{ref:'Isaías 26:19',bk:'is',ch:26,text:'«Tus muertos vivirán; sus cadáveres resucitarán.»'},f:{ref:'Lucas 7:14-15',bk:'lc',ch:7,text:'«Y se incorporó el que había muerto, y comenzó a hablar.»'}},
+      {theme:'Calmó la tempestad',p:{ref:'Salmos 107:29',bk:'sal',ch:107,text:'«Cambia la tempestad en sosiego, y se apaciguan sus ondas.»'},f:{ref:'Marcos 4:39',bk:'mr',ch:4,text:'«Y levantándose, reprendió al viento, y dijo al mar: Calla, enmudece. Y cesó el viento.»'}},
+      {theme:'Alimentó a las multitudes',p:{ref:'Salmos 132:15',bk:'sal',ch:132,text:'«Bendeciré abundantemente su provisión; a sus pobres saciaré de pan.»'},f:{ref:'Mateo 14:19-21',bk:'mt',ch:14,text:'«Y comieron todos, y se saciaron; y recogieron lo que sobró de los pedazos, doce cestas llenas.»'}},
+      {theme:'Perdonó a la adúltera',p:{ref:'Isaías 43:25',bk:'is',ch:43,text:'«Yo, yo soy el que borro tus rebeliones.»'},f:{ref:'Juan 8:11',bk:'jn',ch:8,text:'«…Ni yo te condeno; vete, y no peques más.»'}},
+      {theme:'Hizo lo que agrada al Padre',p:{ref:'Isaías 42:1',bk:'is',ch:42,text:'«Mi escogido, en quien mi alma tiene contentamiento.»'},f:{ref:'Juan 8:29',bk:'jn',ch:8,text:'«…hago siempre lo que le agrada.»'}},
+      {theme:'Habló palabras de vida',p:{ref:'Deuteronomio 18:18',bk:'dt',ch:18,text:'«Pondré mis palabras en su boca.»'},f:{ref:'Juan 6:68',bk:'jn',ch:6,text:'«Señor, ¿a quién iremos? Tú tienes palabras de vida eterna.»'}}
+    ]
+  },
+  {
+    key: 'jerusalem', label: 'Entrada a Jerusalén y Última Semana',
+    intro: 'La última semana de Jesús en Jerusalén fue la semana más profetizada de toda la historia. Desde la entrada triunfal en burro hasta la Última Cena, cada evento fue anunciado por los profetas. Esta sección te ayudará a ver la última semana de Cristo con nuevos ojos.',
+    pairs: [
+      {theme:'Entrada triunfal en burro',p:{ref:'Zacarías 9:9',bk:'zac',ch:9,text:'«Alégrate mucho…He aquí tu rey vendrá a ti, justo y salvador, humilde, montado sobre un asno.»'},f:{ref:'Mateo 21:4-5',bk:'mt',ch:21,text:'«Todo esto aconteció para que se cumpliese lo dicho por el profeta…He aquí, tu Rey viene a ti, manso, y sentado sobre una asna.»'}},
+      {theme:'Aclamado como rey',p:{ref:'Salmos 118:25-26',bk:'sal',ch:118,text:'«¡Hosanna! Bendito el que viene en el nombre de Jehová.»'},f:{ref:'Mateo 21:9',bk:'mt',ch:21,text:'«Y la gente que iba delante y la que iba detrás aclamaba, diciendo: ¡Hosanna al Hijo de David!»'}},
+      {theme:'Limpieza del templo',p:{ref:'Malaquías 3:1',bk:'mal',ch:3,text:'«…y vendrá súbitamente a su templo el Señor.»'},f:{ref:'Mateo 21:12',bk:'mt',ch:21,text:'«Y entró Jesús en el templo de Dios, y echó fuera a todos los que vendían y compraban en el templo.»'}},
+      {theme:'La nueva pascua',p:{ref:'Éxodo 12:5',bk:'ex',ch:12,text:'«El animal será sin defecto, macho de un año.»'},f:{ref:'1 Corintios 5:7',bk:'1co',ch:5,text:'«Porque nuestra pascua, que es Cristo, ya fue sacrificada por nosotros.»'}},
+      {theme:'Instituyó la Cena del Señor',p:{ref:'Salmos 22:26',bk:'sal',ch:22,text:'«Comerán los humildes, y serán saciados.»'},f:{ref:'Mateo 26:26-28',bk:'mt',ch:26,text:'«…Jesús tomó el pan, y bendijo, y lo partió, y dio a sus discípulos, y dijo: Tomad, comed; esto es mi cuerpo.»'}},
+      {theme:'Oró en el Getsemaní',p:{ref:'Salmos 88:1-2',bk:'sal',ch:88,text:'«Oh Jehová, Dios de mi salvación, día y noche clamo delante de ti.»'},f:{ref:'Mateo 26:39',bk:'mt',ch:26,text:'«Yendo un poco adelante, se postró sobre su rostro, orando y diciendo: Padre mío, si es posible, pase de mí esta copa.»'}},
+      {theme:'Sudó gotas de sangre',p:{ref:'Salmos 22:14',bk:'sal',ch:22,text:'«Como agua me he derramado, y todos mis huesos se descoyuntaron.»'},f:{ref:'Lucas 22:44',bk:'lc',ch:22,text:'«Y estando en agonía, oraba más intensamente; y era su sudor como grandes gotas de sangre.»'}},
+      {theme:'Fue traicionado por un amigo',p:{ref:'Salmos 41:9',bk:'sal',ch:41,text:'«Aun el hombre de mi paz, en quien yo confiaba, el que de mi pan comía, alzó contra mí el calcañar.»'},f:{ref:'Juan 13:18',bk:'jn',ch:13,text:'«El que come pan conmigo, levantó contra mí su calcañar.»'}},
+      {theme:'Traicionado por 30 monedas',p:{ref:'Zacarías 11:12',bk:'zac',ch:11,text:'«Y pesaron por mi salario treinta piezas de plata.»'},f:{ref:'Mateo 26:15',bk:'mt',ch:26,text:'«…Y ellos le asignaron treinta piezas de plata.»'}},
+      {theme:'El dinero devuelto al templo',p:{ref:'Zacarías 11:13',bk:'zac',ch:11,text:'«…las eché en la casa de Jehová al alfarero.»'},f:{ref:'Mateo 27:5-7',bk:'mt',ch:27,text:'«Y arrojando las piezas de plata en el templo, salió…Y los principales sacerdotes…compraron con ellas el campo del alfarero.»'}},
+      {theme:'Sus discípulos le abandonaron',p:{ref:'Zacarías 13:7',bk:'zac',ch:13,text:'«Hiere al pastor, y serán dispersadas las ovejas.»'},f:{ref:'Mateo 26:56',bk:'mt',ch:26,text:'«Mas todo esto sucedió, para que se cumpliesen las Escrituras de los profetas. Entonces todos los discípulos, dejándole, huyeron.»'}},
+      {theme:'Pedro le negó',p:{ref:'Salmos 31:11',bk:'sal',ch:31,text:'«He sido olvidado de sus corazones como un muerto; he venido a ser como un vaso roto.»'},f:{ref:'Mateo 26:70-74',bk:'mt',ch:26,text:'«Mas él negó delante de todos, diciendo: No sé lo que dices.»'}},
+      {theme:'Juzgado por Pilato',p:{ref:'Isaías 53:8',bk:'is',ch:53,text:'«Por cárcel y por juicio fue quitado.»'},f:{ref:'Mateo 27:2',bk:'mt',ch:27,text:'«Y llevándole atado, le entregaron a Poncio Pilato, el gobernador.»'}},
+      {theme:'Acusado falsamente',p:{ref:'Salmos 35:11',bk:'sal',ch:35,text:'«Testigos maliciosos se levantan; de lo que no sé me preguntan.»'},f:{ref:'Mateo 26:59-60',bk:'mt',ch:26,text:'«Y los principales sacerdotes…buscaban falso testimonio contra Jesús.»'}},
+      {theme:'Callado ante sus acusadores',p:{ref:'Isaías 53:7',bk:'is',ch:53,text:'«Angustiado él, y afligido, no abrió su boca; como cordero fue llevado al matadero.»'},f:{ref:'Mateo 27:12-14',bk:'mt',ch:27,text:'«Y siendo acusado por los principales sacerdotes…nada respondió.»'}},
+      {theme:'Lloró sobre Jerusalén',p:{ref:'Isaías 22:4',bk:'is',ch:22,text:'«Mirad, pues, que no me consoléis; lloraré amargamente.»'},f:{ref:'Lucas 19:41',bk:'lc',ch:19,text:'«Y cuando llegó cerca de la ciudad, al verla, lloró sobre ella.»'}},
+      {theme:'Ungido en Betania',p:{ref:'Salmos 23:5',bk:'sal',ch:23,text:'«Unges mi cabeza con aceite.»'},f:{ref:'Mateo 26:7',bk:'mt',ch:26,text:'«Una mujer…derramó perfume sobre su cabeza.»'}},
+      {theme:'Comió la Pascua con sus discípulos',p:{ref:'Éxodo 12:3',bk:'ex',ch:12,text:'«…tomará cada uno un cordero según las familias de los padres.»'},f:{ref:'Lucas 22:15',bk:'lc',ch:22,text:'«Y les dijo: ¡Cuánto he deseado comer con vosotros esta pascua antes que padezca!»'}}
+    ]
+  },
+  {
+    key: 'traicion', label: 'Traición, Arresto y Juicio',
+    intro: 'Cada detalle del proceso judicial de Jesús — desde la traición de Judas hasta la sentencia de Pilato — fue anunciado con anticipación. Estas profecías revelan que la cruz no fue un accidente histórico sino el plan eterno de Dios ejecutado con precisión sobrenatural.',
+    pairs: [
+      {theme:'Vendido por un amigo cercano',p:{ref:'Salmos 55:12-14',bk:'sal',ch:55,text:'«Porque no me afrentó un enemigo…sino tú, hombre, al parecer íntimo mío, mi guía y mi familiar.»'},f:{ref:'Lucas 22:47-48',bk:'lc',ch:22,text:'«…el que se llamaba Judas, uno de los doce…se acercó a Jesús para besarle.»'}},
+      {theme:'Arrestado de noche',p:{ref:'Job 24:14',bk:'job',ch:24,text:'«A la luz se levanta el matador; mata al pobre y al necesitado, y de noche es como ladrón.»'},f:{ref:'Mateo 26:47',bk:'mt',ch:26,text:'«Mientras todavía hablaba, vino Judas, uno de los doce, y con él mucha gente con espadas y palos.»'}},
+      {theme:'Sus acusadores vienen de noche',p:{ref:'Salmos 64:2',bk:'sal',ch:64,text:'«Escóndeme del consejo secreto de los malignos.»'},f:{ref:'Juan 18:3',bk:'jn',ch:18,text:'«Judas, pues, tomando una compañía de soldados, y alguaciles de los principales sacerdotes y de los fariseos, fue allá con linternas y antorchas.»'}},
+      {theme:'Presentado ante las autoridades',p:{ref:'Isaías 53:8',bk:'is',ch:53,text:'«Por cárcel y por juicio fue quitado.»'},f:{ref:'Mateo 27:11',bk:'mt',ch:27,text:'«Jesús, pues, estaba en pie delante del gobernador; y éste le preguntó, diciendo: ¿Eres tú el Rey de los judíos?»'}},
+      {theme:'Herido e insultado',p:{ref:'Miqueas 5:1',bk:'mi',ch:5,text:'«…herirán en la mejilla al juez de Israel.»'},f:{ref:'Mateo 27:30',bk:'mt',ch:27,text:'«Y escupiéndole, tomaban la caña y le golpeaban en la cabeza.»'}},
+      {theme:'Abandonado por todos',p:{ref:'Salmos 31:11',bk:'sal',ch:31,text:'«Fui objeto de reproche para todos mis adversarios, y mayormente para mis vecinos.»'},f:{ref:'Marcos 14:50',bk:'mr',ch:14,text:'«Entonces todos le abandonaron y huyeron.»'}},
+      {theme:'Barrabás liberado en su lugar',p:{ref:'Isaías 53:6',bk:'is',ch:53,text:'«Jehová cargó en él el pecado de todos nosotros.»'},f:{ref:'Mateo 27:26',bk:'mt',ch:27,text:'«Entonces les soltó a Barrabás; y habiendo azotado a Jesús, le entregó para ser crucificado.»'}},
+      {theme:'Condenado injustamente',p:{ref:'Isaías 53:8',bk:'is',ch:53,text:'«…en su angustia no abrió la boca…por la rebelión de mi pueblo fue herido.»'},f:{ref:'Lucas 23:4',bk:'lc',ch:23,text:'«Y Pilato dijo a los principales sacerdotes…: Ningún delito hallo en este hombre.»'}},
+      {theme:'Coronado de espinas',p:{ref:'Génesis 3:17-18',bk:'gn',ch:3,text:'«…espinos y cardos te producirá.»'},f:{ref:'Mateo 27:29',bk:'mt',ch:27,text:'«Y trenzando una corona de espinas, se la pusieron sobre su cabeza.»'}},
+      {theme:'Azotado y golpeado',p:{ref:'Isaías 50:6',bk:'is',ch:50,text:'«Di mi cuerpo a los heridores, y mis mejillas a los que me mesaban la barba; no escondí mi rostro de injurias y de esputos.»'},f:{ref:'Mateo 27:26-30',bk:'mt',ch:27,text:'«Y habiendo azotado a Jesús, le entregó para ser crucificado.»'}},
+      {theme:'Vestido con manto de escarnio',p:{ref:'Salmos 22:6-7',bk:'sal',ch:22,text:'«Mas yo soy gusano, y no hombre; oprobio de los hombres, y despreciado del pueblo.»'},f:{ref:'Marcos 15:17',bk:'mr',ch:15,text:'«Y le vistieron de púrpura, y poniéndole una corona tejida de espinas, le saludaron.»'}},
+      {theme:'Escupido y abofeteado',p:{ref:'Isaías 50:6',bk:'is',ch:50,text:'«…no escondí mi rostro de injurias y de esputos.»'},f:{ref:'Marcos 14:65',bk:'mr',ch:14,text:'«Y algunos comenzaron a escupirle, y a cubrirle el rostro y a darle de puñetazos.»'}},
+      {theme:'Sus amigos lejos de él',p:{ref:'Salmos 38:11',bk:'sal',ch:38,text:'«Mis amigos y mis compañeros se mantienen lejos de mi plaga.»'},f:{ref:'Lucas 23:49',bk:'lc',ch:23,text:'«…todos sus conocidos…estaban lejos mirando estas cosas.»'}},
+      {theme:'Su rostro desfigurado',p:{ref:'Isaías 52:14',bk:'is',ch:52,text:'«…fue desfigurado de los hombres su parecer.»'},f:{ref:'Mateo 27:30',bk:'mt',ch:27,text:'«Y escupiéndole, tomaban la caña y le golpeaban en la cabeza.»'}}
+    ]
+  },
+  {
+    key: 'crucifixion', label: 'Sufrimiento y Crucifixión',
+    intro: 'El Salmo 22, escrito 1000 años antes de que Roma inventara la crucifixión, describe con detalles imposibles de conocer la experiencia de Jesús en la cruz. Esta sección te llevará versículo por versículo a través de la profecía más detallada sobre la muerte del Mesías y su cumplimiento exacto.',
+    pairs: [
+      {theme:'Crucificado entre malhechores',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…y fue contado con los pecadores.»'},f:{ref:'Mateo 27:38',bk:'mt',ch:38,text:'«Entonces crucificaron con él a dos ladrones, uno a la derecha, y otro a la izquierda.»'}},
+      {theme:'Las manos y los pies horadados',p:{ref:'Salmos 22:16',bk:'sal',ch:22,text:'«Horadaron mis manos y mis pies.»'},f:{ref:'Juan 20:25-27',bk:'jn',ch:20,text:'«Si no viere en sus manos la señal de los clavos…Entonces dice a Tomás: Pon aquí tu dedo, y mira mis manos.»'}},
+      {theme:'Echaron suertes por su ropa',p:{ref:'Salmos 22:18',bk:'sal',ch:22,text:'«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»'},f:{ref:'Juan 19:23-24',bk:'jn',ch:19,text:'«Los soldados tomaron sus vestidos…y echaron suertes sobre ella, a ver de quién sería.»'}},
+      {theme:'Dado a beber vinagre',p:{ref:'Salmos 69:21',bk:'sal',ch:69,text:'«…en mi sed me dieron a beber vinagre.»'},f:{ref:'Juan 19:29-30',bk:'jn',ch:19,text:'«Y al instante uno de ellos tomó una esponja, y la empapó de vinagre, y poniéndola en una caña, le dio a beber.»'}},
+      {theme:'Le ofrecieron hiel',p:{ref:'Salmos 69:21',bk:'sal',ch:69,text:'«Me pusieron además hiel por comida.»'},f:{ref:'Mateo 27:34',bk:'mt',ch:27,text:'«Le dieron a beber vinagre mezclado con hiel; pero después de haberlo probado, no quiso beberlo.»'}},
+      {theme:'Sus huesos descoyuntados',p:{ref:'Salmos 22:14',bk:'sal',ch:22,text:'«…y todos mis huesos se descoyuntaron.»'},f:{ref:'Juan 19:34',bk:'jn',ch:19,text:'«…uno de los soldados le abrió el costado con una lanza.»'}},
+      {theme:'El corazón derretido',p:{ref:'Salmos 22:14',bk:'sal',ch:22,text:'«Mi corazón fue como cera, derritiéndose en medio de mis entrañas.»'},f:{ref:'Juan 19:34',bk:'jn',ch:19,text:'«…y al momento salió sangre y agua.»'}},
+      {theme:'La lengua pegada al paladar',p:{ref:'Salmos 22:15',bk:'sal',ch:22,text:'«…y mi lengua se pegó a mi paladar.»'},f:{ref:'Juan 19:28',bk:'jn',ch:19,text:'«…Jesús, sabiendo que ya todo estaba consumado, dijo, para que la Escritura se cumpliese: Tengo sed.»'}},
+      {theme:'Burlado en la cruz',p:{ref:'Salmos 22:7-8',bk:'sal',ch:22,text:'«Todos los que me ven me escarnecen; estiran la boca, menean la cabeza, diciendo: Se encomendó a Jehová; líbrele él.»'},f:{ref:'Mateo 27:39-43',bk:'mt',ch:27,text:'«Y los que pasaban le injuriaban, meneando la cabeza…Confió en Dios; líbrele ahora si le quiere.»'}},
+      {theme:'Abandonado por Dios',p:{ref:'Salmos 22:1',bk:'sal',ch:22,text:'«Dios mío, Dios mío, ¿por qué me has abandonado?»'},f:{ref:'Mateo 27:46',bk:'mt',ch:27,text:'«…Jesús clamó a gran voz, diciendo: Eli, Eli, ¿lama sabactani? Esto es: Dios mío, Dios mío, ¿por qué me has desamparado?»'}},
+      {theme:'Mirado y contemplado',p:{ref:'Salmos 22:17',bk:'sal',ch:22,text:'«Mirarán y palidecerán sobre mí.»'},f:{ref:'Lucas 23:35',bk:'lc',ch:23,text:'«Y el pueblo estaba mirando; y aun los gobernantes se burlaban de él.»'}},
+      {theme:'Le rogó al Padre por sus enemigos',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…habiendo él llevado el pecado de muchos, e intercedido por los transgresores.»'},f:{ref:'Lucas 23:34',bk:'lc',ch:23,text:'«Y Jesús decía: Padre, perdónalos, porque no saben lo que hacen.»'}},
+      {theme:'Las tinieblas cubrieron la tierra',p:{ref:'Amós 8:9',bk:'am',ch:8,text:'«Y en aquel día, dice Jehová el Señor, haré que el sol se ponga al mediodía.»'},f:{ref:'Mateo 27:45',bk:'mt',ch:27,text:'«Y desde la hora sexta hubo tinieblas sobre toda la tierra hasta la hora novena.»'}},
+      {theme:'El velo del templo se rasgó',p:{ref:'Isaías 64:1',bk:'is',ch:64,text:'«Oh, si rompieses los cielos, y descendieras.»'},f:{ref:'Mateo 27:51',bk:'mt',ch:27,text:'«Y he aquí, el velo del templo se rasgó en dos, de arriba abajo.»'}},
+      {theme:'Su cuerpo no se corrompió',p:{ref:'Salmos 16:10',bk:'sal',ch:16,text:'«…ni permitirás que tu santo vea corrupción.»'},f:{ref:'Hechos 2:31',bk:'hch',ch:2,text:'«…habló de la resurrección de Cristo, que su alma no fue dejada en el Hades, ni su carne vio corrupción.»'}},
+      {theme:'Oró por sus verdugos',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…e intercedió por los transgresores.»'},f:{ref:'Lucas 23:34',bk:'lc',ch:23,text:'«Padre, perdónalos, porque no saben lo que hacen.»'}},
+      {theme:'Le tentaron en la cruz',p:{ref:'Salmos 22:8',bk:'sal',ch:22,text:'«Se encomendó a Jehová; líbrele él.»'},f:{ref:'Mateo 27:43',bk:'mt',ch:27,text:'«Confió en Dios; líbrele ahora si le quiere.»'}}
+    ]
+  },
+  {
+    key: 'muerte', label: 'Muerte y Sepultura',
+    intro: 'Los detalles en torno a la muerte y sepultura de Jesús fueron profetizados con una precisión que desafía cualquier explicación humana. Desde el hueso que no sería quebrado hasta el sepulcro prestado por un hombre rico, cada detalle cumple una escritura específica.',
+    pairs: [
+      {theme:'Ningún hueso quebrado',p:{ref:'Salmos 34:20',bk:'sal',ch:34,text:'«Él guarda todos sus huesos; ni uno de ellos será quebrantado.»'},f:{ref:'Juan 19:33-36',bk:'jn',ch:19,text:'«Mas cuando llegaron a Jesús, como le vieron ya muerto, no le quebraron las piernas…Para que se cumpliese la Escritura.»'}},
+      {theme:'Traspasado el costado',p:{ref:'Zacarías 12:10',bk:'zac',ch:12,text:'«…y mirarán a mí, a quien traspasaron.»'},f:{ref:'Juan 19:34-37',bk:'jn',ch:19,text:'«…uno de los soldados le abrió el costado con una lanza…Y también otra escritura dice: Mirarán al que traspasaron.»'}},
+      {theme:'Sepultado con los ricos',p:{ref:'Isaías 53:9',bk:'is',ch:53,text:'«…mas con los ricos fue en su muerte.»'},f:{ref:'Mateo 27:57-60',bk:'mt',ch:57,text:'«Cuando llegó la noche, vino un hombre rico de Arimatea, llamado José…y lo puso en su sepulcro nuevo.»'}},
+      {theme:'Muerto como cordero pascual',p:{ref:'Éxodo 12:46',bk:'ex',ch:12,text:'«…ni quebraréis hueso suyo.»'},f:{ref:'Juan 19:36',bk:'jn',ch:19,text:'«Porque estas cosas sucedieron para que se cumpliese la Escritura: No será quebrado hueso suyo.»'}},
+      {theme:'Contado entre transgresores',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…y fue contado con los pecadores.»'},f:{ref:'Lucas 23:32-33',bk:'lc',ch:23,text:'«Llevaban también con él a otros dos, que eran malhechores, para ser ejecutados. Y cuando llegaron al lugar llamado de la Calavera, le crucificaron allí.»'}},
+      {theme:'Sepultado y resucitado',p:{ref:'Jonás 1:17',bk:'jon',ch:1,text:'«Y estuvo Jonás en el vientre del pez tres días y tres noches.»'},f:{ref:'Mateo 12:40',bk:'mt',ch:12,text:'«Porque como estuvo Jonás en el vientre del gran pez tres días y tres noches, así estará el Hijo del Hombre en el corazón de la tierra tres días y tres noches.»'}},
+      {theme:'Su sepulcro vigilado y sellado',p:{ref:'Daniel 6:17',bk:'dn',ch:6,text:'«Y fue traída una piedra y puesta sobre la puerta del foso.»'},f:{ref:'Mateo 27:66',bk:'mt',ch:27,text:'«Entonces ellos fueron y aseguraron el sepulcro, sellando la piedra y poniendo la guardia.»'}},
+      {theme:'Comprado con sangre inocente',p:{ref:'Jeremías 32:6-9',bk:'jer',ch:32,text:'«…compré el campo de Hanameel…y le pesé el dinero.»'},f:{ref:'Mateo 27:6-8',bk:'mt',ch:27,text:'«Pero los principales sacerdotes, tomando las piezas de plata…compraron con ellas el campo del alfarero.»'}},
+      {theme:'Lamentado por las mujeres',p:{ref:'Zacarías 12:10',bk:'zac',ch:12,text:'«Y mirarán a mí, a quien traspasaron, y harán llanto como en miseria de unigénito.»'},f:{ref:'Lucas 23:27-28',bk:'lc',ch:23,text:'«Y le seguía gran multitud del pueblo, y de mujeres que lloraban y hacían lamentación por él.»'}},
+      {theme:'Sus discípulos lo lloraron',p:{ref:'Salmos 35:14',bk:'sal',ch:35,text:'«Me comporté como por el llanto de madre; me humillé con ayuno.»'},f:{ref:'Juan 20:11',bk:'jn',ch:20,text:'«Pero María estaba fuera llorando junto al sepulcro.»'}},
+      {theme:'Su muerte expiatoria',p:{ref:'Isaías 53:5',bk:'is',ch:53,text:'«Mas él herido fue por nuestras rebeliones, molido por nuestros pecados.»'},f:{ref:'Romanos 4:25',bk:'ro',ch:4,text:'«El cual fue entregado por nuestras transgresiones, y resucitado para nuestra justificación.»'}},
+      {theme:'Derramó su alma hasta la muerte',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…derramó su vida hasta la muerte.»'},f:{ref:'Marcos 15:37',bk:'mr',ch:15,text:'«Mas Jesús, dando una gran voz, expiró.»'}},
+      {theme:'Bajado antes del sábado',p:{ref:'Deuteronomio 21:23',bk:'dt',ch:21,text:'«No dejarás que su cuerpo pase la noche sobre el madero.»'},f:{ref:'Juan 19:31',bk:'jn',ch:19,text:'«Los judíos rogaron a Pilato que se les quebrasen las piernas, y que fuesen quitados.»'}},
+      {theme:'El precio de la sangre',p:{ref:'Zacarías 11:13',bk:'zac',ch:11,text:'«…las eché en la casa de Jehová al alfarero.»'},f:{ref:'Mateo 27:7',bk:'mt',ch:27,text:'«…compraron con ellas el campo del alfarero, para sepultura de extranjeros.»'}},
+      {theme:'Su muerte expiatoria',p:{ref:'Isaías 53:5',bk:'is',ch:53,text:'«Mas él herido fue por nuestras rebeliones, molido por nuestros pecados.»'},f:{ref:'Romanos 4:25',bk:'ro',ch:4,text:'«El cual fue entregado por nuestras transgresiones, y resucitado para nuestra justificación.»'}}
+    ]
+  },
+  {
+    key: 'resurreccion', label: 'Resurrección y Ascensión',
+    intro: 'La resurrección es el evento más transformador de la historia, y fue profetizado con claridad siglos antes. El Salmo 16, escrito por David, describe la resurrección con tal precisión que Pedro lo cita como prueba central en su sermón de Pentecostés. Esta sección te mostrará por qué la resurrección era el plan de Dios desde siempre.',
+    pairs: [
+      {theme:'No vería corrupción',p:{ref:'Salmos 16:10',bk:'sal',ch:16,text:'«…no dejarás mi alma en el Seol, ni permitirás que tu santo vea corrupción.»'},f:{ref:'Hechos 2:31',bk:'hch',ch:2,text:'«…habló de la resurrección de Cristo, que su alma no fue dejada en el Hades, ni su carne vio corrupción.»'}},
+      {theme:'Resurrección al tercer día',p:{ref:'Oseas 6:2',bk:'os',ch:6,text:'«Nos dará vida después de dos días; en el tercer día nos resucitará.»'},f:{ref:'1 Corintios 15:4',bk:'1co',ch:15,text:'«…que fue sepultado, y que resucitó al tercer día, conforme a las Escrituras.»'}},
+      {theme:'Ascensión a la diestra de Dios',p:{ref:'Salmos 110:1',bk:'sal',ch:110,text:'«Jehová dijo a mi Señor: Siéntate a mi diestra.»'},f:{ref:'Hechos 2:34-35',bk:'hch',ch:2,text:'«…dijo el Señor a mi Señor: Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado de tus pies.»'}},
+      {theme:'Enviará al Espíritu Santo',p:{ref:'Joel 2:28',bk:'jl',ch:2,text:'«…derramaré mi Espíritu sobre toda carne.»'},f:{ref:'Hechos 2:16-17',bk:'hch',ch:2,text:'«…He aquí os doy nuevas de gran gozo, que será para todo el pueblo.»'}},
+      {theme:'Exaltado sobre todos',p:{ref:'Salmos 68:18',bk:'sal',ch:68,text:'«Subiste a lo alto, llevaste cautiva la cautividad, tomaste dones para los hombres.»'},f:{ref:'Efesios 4:8',bk:'ef',ch:4,text:'«Por lo cual dice: Subiendo a lo alto, llevó cautiva la cautividad, y dio dones a los hombres.»'}},
+      {theme:'Sentado a la diestra del Padre',p:{ref:'Salmos 110:1',bk:'sal',ch:110,text:'«…Siéntate a mi diestra.»'},f:{ref:'Hebreos 1:3',bk:'heb',ch:1,text:'«…se sentó a la diestra de la Majestad en las alturas.»'}},
+      {theme:'Los ángeles en el sepulcro',p:{ref:'Salmos 91:11',bk:'sal',ch:91,text:'«Pues a sus ángeles mandará acerca de ti, que te guarden en todos tus caminos.»'},f:{ref:'Mateo 28:2',bk:'mt',ch:28,text:'«Y hubo un gran terremoto; porque un ángel del Señor, descendiendo del cielo…había removido la piedra.»'}},
+      {theme:'Sus discípulos le verían resucitado',p:{ref:'Salmos 22:22',bk:'sal',ch:22,text:'«Anunciaré tu nombre a mis hermanos; en medio de la congregación te alabaré.»'},f:{ref:'Mateo 28:10',bk:'mt',ch:28,text:'«Entonces Jesús les dijo: No temáis; id, dad las nuevas a mis hermanos.»'}},
+      {theme:'Su cuerpo glorificado',p:{ref:'Salmos 16:9',bk:'sal',ch:16,text:'«Se alegró por tanto mi corazón, y se gozó mi alma; mi carne también reposará confiadamente.»'},f:{ref:'Filipenses 3:21',bk:'flp',ch:3,text:'«El cual transformará el cuerpo de la humillación nuestra, para que sea semejante al cuerpo de la gloria suya.»'}},
+      {theme:'Anunciado a las naciones',p:{ref:'Isaías 52:15',bk:'is',ch:52,text:'«Así asombrará él a muchas naciones.»'},f:{ref:'Mateo 28:19',bk:'mt',ch:28,text:'«Por tanto, id, y haced discípulos a todas las naciones.»'}},
+      {theme:'Intercede por nosotros',p:{ref:'Isaías 53:12',bk:'is',ch:53,text:'«…e intercedió por los transgresores.»'},f:{ref:'Hebreos 7:25',bk:'heb',ch:7,text:'«…pudiendo también salvar perpetuamente a los que por él se acercan a Dios, viviendo siempre para interceder por ellos.»'}},
+      {theme:'Venció la muerte',p:{ref:'Isaías 25:8',bk:'is',ch:25,text:'«Destruirá a la muerte para siempre.»'},f:{ref:'1 Corintios 15:54',bk:'1co',ch:15,text:'«…entonces se cumplirá la palabra que está escrita: Sorbida es la muerte en victoria.»'}},
+      {theme:'Aparece a sus discípulos',p:{ref:'Salmos 22:22',bk:'sal',ch:22,text:'«Anunciaré tu nombre a mis hermanos.»'},f:{ref:'Juan 20:19',bk:'jn',ch:20,text:'«Vino Jesús, y puesto en medio, les dijo: Paz a vosotros.»'}},
+      {theme:'Enviará al Consolador',p:{ref:'Joel 2:28',bk:'jl',ch:2,text:'«…derramaré mi Espíritu sobre toda carne.»'},f:{ref:'Juan 14:16',bk:'jn',ch:14,text:'«Y yo rogaré al Padre, y os dará otro Consolador, para que esté con vosotros para siempre.»'}},
+      {theme:'Ascendió al cielo',p:{ref:'Salmos 47:5',bk:'sal',ch:47,text:'«Subió Dios con júbilo.»'},f:{ref:'Hechos 1:9',bk:'hch',ch:1,text:'«…fue alzado, y le recibió una nube que le ocultó de sus ojos.»'}}
+    ]
+  },
+  {
+    key: 'reinado', label: 'Su Reinado Eterno',
+    intro: 'El Mesías no vendría solo a morir por los pecados — vendría para reinar eternamente. Las profecías sobre el reinado de Cristo abarcan tanto su reinado espiritual presente en la iglesia como su reino futuro y eterno. Esta sección revela la dimensión cósmica del plan redentor de Dios.',
+    pairs: [
+      {theme:'Rey eterno en el trono de David',p:{ref:'Isaías 9:6-7',bk:'is',ch:9,text:'«…el principado sobre su hombro…y lo dilatado de su imperio y la paz no tendrán límite.»'},f:{ref:'Lucas 1:32-33',bk:'lc',ch:1,text:'«…el Señor Dios le dará el trono de David su padre; y reinará sobre la casa de Jacob para siempre.»'}},
+      {theme:'Rey de reyes',p:{ref:'Daniel 2:44',bk:'dn',ch:2,text:'«…el Dios del cielo levantará un reino que no será jamás destruido.»'},f:{ref:'Apocalipsis 19:16',bk:'ap',ch:19,text:'«Y en su vestidura y en su muslo tiene escrito este nombre: REY DE REYES Y SEÑOR DE SEÑORES.»'}},
+      {theme:'Su dominio hasta los confines de la tierra',p:{ref:'Salmos 72:8',bk:'sal',ch:72,text:'«Dominará de mar a mar, y desde el río hasta los confines de la tierra.»'},f:{ref:'Filipenses 2:10-11',bk:'flp',ch:2,text:'«Para que en el nombre de Jesús se doble toda rodilla…y toda lengua confiese que Jesucristo es el Señor.»'}},
+      {theme:'Las naciones le adorarán',p:{ref:'Isaías 49:6',bk:'is',ch:49,text:'«…te di también por luz de las gentes, para que seas mi salvación hasta lo postrero de la tierra.»'},f:{ref:'Hechos 13:47',bk:'hch',ch:13,text:'«…Te he puesto para luz de los gentiles, a fin de que seas para salvación hasta lo último de la tierra.»'}},
+      {theme:'Sacerdote eterno según Melquisedec',p:{ref:'Salmos 110:4',bk:'sal',ch:110,text:'«Tú eres sacerdote para siempre según el orden de Melquisedec.»'},f:{ref:'Hebreos 6:20',bk:'heb',ch:6,text:'«…Jesús entró por nosotros como precursor, hecho sumo sacerdote para siempre según el orden de Melquisedec.»'}},
+      {theme:'Su reino no tendrá fin',p:{ref:'Daniel 7:14',bk:'dn',ch:7,text:'«…su dominio es dominio eterno, que nunca pasará.»'},f:{ref:'Apocalipsis 11:15',bk:'ap',ch:11,text:'«Los reinos del mundo han venido a ser de nuestro Señor y de su Cristo; y él reinará por los siglos de los siglos.»'}},
+      {theme:'El Hijo del Hombre recibe el reino',p:{ref:'Daniel 7:13-14',bk:'dn',ch:7,text:'«Y he aquí con las nubes del cielo venía uno como un hijo de hombre…y le fue dado dominio, gloria y reino.»'},f:{ref:'Mateo 26:64',bk:'mt',ch:26,text:'«…desde ahora veréis al Hijo del Hombre sentado a la diestra del poder de Dios, y viniendo en las nubes del cielo.»'}},
+      {theme:'El Alfa y la Omega',p:{ref:'Isaías 44:6',bk:'is',ch:44,text:'«Yo soy el primero, y yo soy el postrero, y fuera de mí no hay Dios.»'},f:{ref:'Apocalipsis 1:17',bk:'ap',ch:1,text:'«No temas; yo soy el primero y el último.»'}},
+      {theme:'Todo rodará ante él',p:{ref:'Isaías 45:23',bk:'is',ch:45,text:'«A mí se doblará toda rodilla, y jurará toda lengua.»'},f:{ref:'Romanos 14:11',bk:'ro',ch:14,text:'«Porque escrito está: Vivo yo, dice el Señor, que ante mí se doblará toda rodilla, y toda lengua confesará a Dios.»'}},
+      {theme:'Gobernará con vara de hierro',p:{ref:'Salmos 2:9',bk:'sal',ch:2,text:'«Los quebrantarás con vara de hierro; como vasija de alfarero los desmenuzarás.»'},f:{ref:'Apocalipsis 2:27',bk:'ap',ch:2,text:'«…y los regirá con vara de hierro, y serán quebrados como vaso de alfarero.»'}},
+      {theme:'El trono de Dios y del Cordero',p:{ref:'Ezequiel 43:7',bk:'ez',ch:43,text:'«…y habitaré en medio de los hijos de Israel para siempre.»'},f:{ref:'Apocalipsis 22:3',bk:'ap',ch:22,text:'«Y no habrá más maldición; y el trono de Dios y del Cordero estará en ella.»'}},
+      {theme:'Reinará sobre toda creación',p:{ref:'Salmos 8:6',bk:'sal',ch:8,text:'«Todo lo pusiste debajo de sus pies.»'},f:{ref:'Hebreos 2:8',bk:'heb',ch:2,text:'«…le sujetaste todas las cosas. Pues en cuanto le sujetó todas las cosas, nada dejó que no sea sujeto a él.»'}},
+      {theme:'El Cordero en el trono',p:{ref:'Daniel 7:9',bk:'dn',ch:7,text:'«…el Anciano de días se sentó.»'},f:{ref:'Apocalipsis 5:13',bk:'ap',ch:5,text:'«Al que está sentado en el trono, y al Cordero, sea la alabanza, la honra, la gloria y el poder.»'}},
+      {theme:'Su gloria llenará la tierra',p:{ref:'Habacuc 2:14',bk:'hab',ch:2,text:'«La tierra será llena del conocimiento de la gloria de Jehová.»'},f:{ref:'Juan 17:22',bk:'jn',ch:17,text:'«La gloria que me diste, yo les he dado.»'}},
+      {theme:'Destruirá al maligno',p:{ref:'Isaías 11:4',bk:'is',ch:11,text:'«…con el soplo de sus labios matará al impío.»'},f:{ref:'2 Tesalonicenses 2:8',bk:'2ts',ch:2,text:'«Y entonces se manifestará aquel inicuo, a quien el Señor matará con el espíritu de su boca.»'}}
+    ]
+  },
+  {
+    key: 'iglesia', label: 'La Iglesia y las Naciones',
+    intro: 'El Mesías no solo salvaría a Israel sino que extendería la salvación a todas las naciones de la tierra. Las profecías sobre la iglesia revelan que el plan de Dios siempre fue incluir a judíos y gentiles en un solo cuerpo. Esta sección te mostrará cómo la iglesia es el cumplimiento de las promesas hechas a Abraham.',
+    pairs: [
+      {theme:'Salvación para los gentiles',p:{ref:'Isaías 11:10',bk:'is',ch:11,text:'«…a él buscarán los gentiles.»'},f:{ref:'Romanos 15:12',bk:'ro',ch:15,text:'«Y otra vez Isaías dice: Estará la raíz de Isaí, y el que se levantará a regir los gentiles; los gentiles esperarán en él.»'}},
+      {theme:'Nuevo pacto con Israel',p:{ref:'Jeremías 31:31',bk:'jer',ch:31,text:'«He aquí que vienen días, dice Jehová, en los cuales haré nuevo pacto con la casa de Israel.»'},f:{ref:'Lucas 22:20',bk:'lc',ch:22,text:'«…Esta copa es el nuevo pacto en mi sangre, que por vosotros se derrama.»'}},
+      {theme:'La piedra que llena la tierra',p:{ref:'Daniel 2:35',bk:'dn',ch:2,text:'«…la piedra que hirió a la imagen se hizo un gran monte que llenó toda la tierra.»'},f:{ref:'Mateo 16:18',bk:'mt',ch:16,text:'«…edificaré mi iglesia; y las puertas del Hades no prevalecerán contra ella.»'}},
+      {theme:'Los gentiles traerán ofrendas',p:{ref:'Isaías 60:5-6',bk:'is',ch:60,text:'«Las riquezas de las naciones vendrán a ti.»'},f:{ref:'Romanos 15:16',bk:'ro',ch:15,text:'«Para ser ministro de Jesucristo a los gentiles…para que los gentiles le sean ofrenda agradable.»'}},
+      {theme:'La ley escrita en el corazón',p:{ref:'Ezequiel 36:26-27',bk:'ez',ch:36,text:'«Os daré corazón nuevo, y pondré espíritu nuevo dentro de vosotros.»'},f:{ref:'2 Corintios 3:3',bk:'2co',ch:3,text:'«…escritas no con tinta, sino con el Espíritu del Dios vivo; no en tablas de piedra, sino en tablas de carne del corazón.»'}},
+      {theme:'El Espíritu derramado sobre todos',p:{ref:'Ezequiel 36:27',bk:'ez',ch:36,text:'«Y pondré dentro de vosotros mi Espíritu.»'},f:{ref:'Hechos 2:38',bk:'hch',ch:2,text:'«…y recibiréis el don del Espíritu Santo.»'}},
+      {theme:'Un solo rebaño',p:{ref:'Ezequiel 37:22',bk:'ez',ch:37,text:'«…y los haré una nación en la tierra.»'},f:{ref:'Juan 10:16',bk:'jn',ch:10,text:'«También tengo otras ovejas que no son de este redil…y habrá un rebaño, y un pastor.»'}},
+      {theme:'El evangelio predicado en todo el mundo',p:{ref:'Isaías 52:10',bk:'is',ch:52,text:'«Jehová desnudó su santo brazo ante los ojos de todas las naciones, y todos los confines de la tierra verán la salvación del Dios nuestro.»'},f:{ref:'Mateo 24:14',bk:'mt',ch:24,text:'«Y será predicado este evangelio del reino en todo el mundo, para testimonio a todas las naciones.»'}},
+      {theme:'Abolición de las ceremonias',p:{ref:'Daniel 9:27',bk:'dn',ch:9,text:'«Y a la mitad de la semana hará cesar el sacrificio y la ofrenda.»'},f:{ref:'Hebreos 10:12',bk:'heb',ch:10,text:'«Pero éste, habiendo ofrecido una vez para siempre un solo sacrificio por los pecados, se ha sentado a la diestra de Dios.»'}},
+      {theme:'Los muertos en Cristo resucitarán',p:{ref:'Daniel 12:2',bk:'dn',ch:12,text:'«Y muchos de los que duermen en el polvo de la tierra serán despertados.»'},f:{ref:'Juan 5:28-29',bk:'jn',ch:5,text:'«…viene la hora cuando todos los que están en los sepulcros oirán su voz.»'}},
+      {theme:'La alianza nueva',p:{ref:'Jeremías 31:33',bk:'jer',ch:31,text:'«…daré mi ley en su mente, y la escribiré en su corazón.»'},f:{ref:'Hebreos 8:10',bk:'heb',ch:8,text:'«Pondré mis leyes en la mente de ellos, y sobre su corazón las escribiré.»'}},
+      {theme:'Un pueblo de todas las naciones',p:{ref:'Oseas 1:10',bk:'os',ch:1,text:'«…se les dirá: Sois hijos del Dios viviente.»'},f:{ref:'Romanos 9:26',bk:'ro',ch:9,text:'«…allí serán llamados hijos del Dios viviente.»'}},
+      {theme:'La gran comisión',p:{ref:'Salmos 22:27',bk:'sal',ch:22,text:'«Se acordarán, y se volverán a Jehová todos los confines de la tierra.»'},f:{ref:'Mateo 28:19',bk:'mt',ch:28,text:'«Por tanto, id, y haced discípulos a todas las naciones.»'}},
+      {theme:'Los gentiles buscan al Señor',p:{ref:'Amós 9:11-12',bk:'am',ch:9,text:'«Para que aquellos sobre los cuales es invocado mi nombre sean llamados míos.»'},f:{ref:'Hechos 15:17',bk:'hch',ch:15,text:'«Para que el resto de los hombres busque al Señor, y todos los gentiles.»'}}
+    ]
+  },
+  {
+    key: 'segunda_venida', label: 'Segunda Venida y Juicio Final',
+    intro: 'Las profecías sobre la segunda venida de Cristo superan en número a las de su primera venida. El Antiguo Testamento está lleno de visiones sobre el Día del Señor, cuando Cristo regresará no como cordero sino como Rey y Juez. Esta sección te preparará para entender el final de la historia desde la perspectiva profética.',
+    pairs: [
+      {theme:'Vendrá en las nubes del cielo',p:{ref:'Daniel 7:13',bk:'dn',ch:7,text:'«…y he aquí con las nubes del cielo venía uno como un hijo de hombre.»'},f:{ref:'Mateo 26:64',bk:'mt',ch:26,text:'«…veréis al Hijo del Hombre sentado a la diestra del poder de Dios, y viniendo en las nubes del cielo.»'}},
+      {theme:'Todo ojo le verá',p:{ref:'Zacarías 12:10',bk:'zac',ch:12,text:'«…y mirarán a mí, a quien traspasaron, y harán llanto como en miseria de unigénito.»'},f:{ref:'Apocalipsis 1:7',bk:'ap',ch:1,text:'«He aquí que viene con las nubes, y todo ojo le verá, y los que le traspasaron.»'}},
+      {theme:'El Día del Señor',p:{ref:'Sofonías 1:14-15',bk:'sof',ch:1,text:'«Cercano está el día grande de Jehová…día de ira aquel día.»'},f:{ref:'1 Tesalonicenses 5:2',bk:'1ts',ch:5,text:'«…el día del Señor vendrá así como ladrón en la noche.»'}},
+      {theme:'Los muertos resucitarán',p:{ref:'Isaías 26:19',bk:'is',ch:26,text:'«Tus muertos vivirán; sus cadáveres resucitarán.»'},f:{ref:'1 Tesalonicenses 4:16',bk:'1ts',ch:4,text:'«Porque el Señor mismo con voz de mando…descenderá del cielo; y los muertos en Cristo resucitarán primero.»'}},
+      {theme:'El juicio de las naciones',p:{ref:'Joel 3:2',bk:'jl',ch:3,text:'«Reuniré a todas las naciones, y las haré descender al valle de Josafat, y allí entraré en juicio con ellas.»'},f:{ref:'Mateo 25:31-32',bk:'mt',ch:25,text:'«Cuando el Hijo del Hombre venga en su gloria…entonces serán reunidas delante de él todas las naciones.»'}},
+      {theme:'El libro de la vida',p:{ref:'Daniel 12:1',bk:'dn',ch:12,text:'«…tu pueblo será libertado, todos los que se hallen escritos en el libro.»'},f:{ref:'Apocalipsis 20:12',bk:'ap',ch:20,text:'«Y los libros fueron abiertos, y otro libro fue abierto, el cual es el libro de la vida.»'}},
+      {theme:'El cielo nuevo y la tierra nueva',p:{ref:'Isaías 65:17',bk:'is',ch:65,text:'«Porque he aquí que yo crearé nuevos cielos y nueva tierra.»'},f:{ref:'Apocalipsis 21:1',bk:'ap',ch:21,text:'«Vi un cielo nuevo y una tierra nueva; porque el primer cielo y la primera tierra pasaron.»'}},
+      {theme:'Dios morará con los hombres',p:{ref:'Ezequiel 37:27',bk:'ez',ch:37,text:'«Estará en medio de ellos mi tabernáculo.»'},f:{ref:'Apocalipsis 21:3',bk:'ap',ch:21,text:'«…He aquí el tabernáculo de Dios con los hombres, y él morará con ellos.»'}},
+      {theme:'No habrá más muerte',p:{ref:'Isaías 25:8',bk:'is',ch:25,text:'«Destruirá a la muerte para siempre.»'},f:{ref:'Apocalipsis 21:4',bk:'ap',ch:21,text:'«Enjugará Dios toda lágrima de los ojos de ellos; y ya no habrá muerte, ni habrá más llanto, ni clamor, ni dolor.»'}},
+      {theme:'El río de vida',p:{ref:'Ezequiel 47:1',bk:'ez',ch:47,text:'«Salían aguas de debajo del umbral de la casa hacia el oriente.»'},f:{ref:'Apocalipsis 22:1',bk:'ap',ch:22,text:'«Después me mostró un río limpio de agua de vida…que salía del trono de Dios y del Cordero.»'}},
+      {theme:'El árbol de la vida restaurado',p:{ref:'Génesis 3:22',bk:'gn',ch:3,text:'«…que no alargue su mano, y tome también del árbol de la vida, y coma, y viva para siempre.»'},f:{ref:'Apocalipsis 22:2',bk:'ap',ch:22,text:'«…el árbol de la vida, que produce doce frutos…y las hojas del árbol eran para la sanidad de las naciones.»'}},
+      {theme:'El sol ya no será necesario',p:{ref:'Isaías 60:19',bk:'is',ch:60,text:'«El sol nunca más te servirá de luz para el día, ni el resplandor de la luna te alumbrará.»'},f:{ref:'Apocalipsis 21:23',bk:'ap',ch:21,text:'«La ciudad no tiene necesidad de sol ni de luna que brillen en ella; porque la gloria de Dios la ilumina, y el Cordero es su lumbrera.»'}},
+      {theme:'Volverá como vino',p:{ref:'Zacarías 14:4',bk:'zac',ch:14,text:'«Y se afirmarán sus pies en aquel día sobre el monte de los Olivos.»'},f:{ref:'Hechos 1:11',bk:'hch',ch:1,text:'«Este mismo Jesús…así vendrá como le habéis visto ir al cielo.»'}},
+      {theme:'La nueva Jerusalén',p:{ref:'Isaías 62:2',bk:'is',ch:62,text:'«…y te será puesto un nombre nuevo.»'},f:{ref:'Apocalipsis 21:2',bk:'ap',ch:21,text:'«Y yo Juan vi la santa ciudad, la nueva Jerusalén, descender del cielo, de Dios.»'}},
+      {theme:'Israel mirará al traspasado',p:{ref:'Zacarías 12:10',bk:'zac',ch:12,text:'«…y mirarán a mí, a quien traspasaron.»'},f:{ref:'Apocalipsis 1:7',bk:'ap',ch:1,text:'«He aquí que viene con las nubes, y todo ojo le verá, y los que le traspasaron.»'}}
+    ]
+  }
+];
+
+let results = {};
+let running = false;
+let startTime = null;
+
+const ALL_PAIRS = [];
+GROUPS.forEach(g => g.pairs.forEach((p,i) => ALL_PAIRS.push({...p, groupKey:g.key, idx: ALL_PAIRS.length})));
+
+function renderGroups() {
+  const el = document.getElementById('groups');
+  el.innerHTML = GROUPS.map(g => `
+    <div class="group">
+      <div class="group-title">${g.label} (${g.pairs.length})</div>
+      <div class="group-items" id="grp-${g.key}">
+        ${g.pairs.map((p,i) => {
+          const globalIdx = ALL_PAIRS.findIndex(x => x.groupKey===g.key && x.theme===p.theme);
+          return `<div class="item" id="item-${globalIdx}">⬜ ${p.theme}</div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+async function generatePair(pair) {
+  const prompt = `Eres un teólogo experto en Biblia Reina Valera 1960 y profecías mesiánicas. Analiza profundamente esta profecía.
+
+GRUPO: "${GROUPS.find(g=>g.key===pair.groupKey)?.label}"
+PROFECÍA: "${pair.theme}"
+AT (${pair.p.ref}): ${pair.p.text}
+NT (${pair.f.ref}): ${pair.f.text}
+
+Responde SOLO con JSON válido, sin texto extra ni markdown:
+{"historical_context":"Contexto histórico: cuándo fue escrita, quién profetizó, situación de Israel (3-4 oraciones detalladas)","at_meaning":"Qué entendían los judíos de esta profecía antes del cumplimiento (2-3 oraciones)","fulfillment_detail":"Cómo se cumplió exactamente en Jesús, por qué es imposible que sea coincidencia (3-4 oraciones)","theological_impact":"Qué revela sobre Dios, su plan redentor, la identidad de Cristo (3-4 oraciones)","practical_application":"Qué significa para el creyente hoy, cómo fortalece la fe (2-3 oraciones)","key_insight":"Una verdad central e impactante que resume el poder de esta profecía (1 oración memorable)"}`;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const resp = await fetch('/.netlify/functions/ai', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({prompt, maxTokens: 1200})
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      let clean = data.text.replace(/```json|```/g,'').trim();
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+      if (s<0||e<0) throw new Error('JSON inválido');
+      return JSON.parse(clean.substring(s,e+1));
+    } catch(err) {
+      if (attempt<2) await new Promise(r=>setTimeout(r,3000));
+      else throw err;
+    }
+  }
+}
+
+async function start() {
+  running = true;
+  startTime = Date.now();
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+
+  const saved = localStorage.getItem('gen_prof_200');
+  if (saved) try { results = JSON.parse(saved); } catch(e) { results={}; }
+
+  let done = Object.keys(results).length;
+  let errors = 0;
+
+  for (let i = 0; i < ALL_PAIRS.length; i++) {
+    if (!running) break;
+    if (results[i]) {
+      const el = document.getElementById('item-'+i);
+      if (el) { el.className='item done'; el.textContent='✅ '+ALL_PAIRS[i].theme; }
+      continue;
+    }
+
+    const pair = ALL_PAIRS[i];
+    const el = document.getElementById('item-'+i);
+    if (el) { el.className='item active'; el.textContent='⏳ '+pair.theme; }
+
+    document.getElementById('p-label').textContent = `[${i+1}/${ALL_PAIRS.length}] ${pair.theme}`;
+    const pct = Math.round(i/ALL_PAIRS.length*100);
+    document.getElementById('p-bar').style.width = pct+'%';
+    document.getElementById('p-pct').textContent = pct+'%';
+
+    try {
+      const theology = await generatePair(pair);
+      results[i] = {...pair, theology};
+      done++;
+      if (el) { el.className='item done'; el.textContent='✅ '+pair.theme; }
+      localStorage.setItem('gen_prof_200', JSON.stringify(results));
+    } catch(err) {
+      errors++;
+      if (el) { el.className='item error'; el.textContent='❌ '+pair.theme; }
+    }
+
+    document.getElementById('s-done').textContent = done;
+    document.getElementById('s-error').textContent = errors;
+    document.getElementById('s-pending').textContent = ALL_PAIRS.length-i-1;
+    const elapsed = (Date.now()-startTime)/1000;
+    const per = elapsed/(i+1);
+    document.getElementById('s-time').textContent = Math.round(per*(ALL_PAIRS.length-i-1))+'s';
+
+    if (i < ALL_PAIRS.length-1) await new Promise(r=>setTimeout(r,2000));
+  }
+
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  document.getElementById('btn-dl').disabled = false;
+  document.getElementById('p-bar').style.width='100%';
+  document.getElementById('p-pct').textContent='100%';
+  document.getElementById('p-label').textContent=`✅ Completado — ${done} generadas`;
+
+  document.getElementById('out-section').style.display='block';
+  document.getElementById('output').textContent = JSON.stringify(buildFinalJSON(),null,2).substring(0,2000)+'...';
+}
+
+function buildFinalJSON() {
+  return {
+    cats: GROUPS.map(g=>({key:g.key, label:g.label, intro:g.intro})),
+    pairs: ALL_PAIRS.map((p,i) => {
+      const r = results[i];
+      return {
+        cat:p.groupKey, theme:p.theme,
+        prophecy:{ref:p.p.ref,bookId:p.p.bk,chapter:p.p.ch,text:p.p.text},
+        fulfillment:{ref:p.f.ref,bookId:p.f.bk,chapter:p.f.ch,text:p.f.text},
+        theology: r ? r.theology : null
+      };
+    })
+  };
+}
+
+function stop() {
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  if (Object.keys(results).length>0) document.getElementById('btn-dl').disabled = false;
+}
+
+function download() {
+  const blob = new Blob([JSON.stringify(buildFinalJSON(),null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='profecias.json'; a.click();
+}
+
+function copyAll() {
+  navigator.clipboard.writeText(JSON.stringify(buildFinalJSON(),null,2)).then(()=>alert('Copiado'));
+}
+
+function clearCache() {
+  if (confirm('¿Limpiar todo el progreso guardado?')) {
+    localStorage.removeItem('gen_prof_200'); results={}; renderGroups();
+    document.getElementById('s-done').textContent='0';
+    document.getElementById('s-pending').textContent=ALL_PAIRS.length;
+  }
+}
+
+// Restaurar progreso
+const saved = localStorage.getItem('gen_prof_200');
+if (saved) {
+  try {
+    results = JSON.parse(saved);
+    const n = Object.keys(results).length;
+    document.getElementById('s-done').textContent = n;
+    document.getElementById('s-pending').textContent = ALL_PAIRS.length-n;
+    if (n>0) { document.getElementById('btn-dl').disabled=false; document.getElementById('p-label').textContent=`${n} ya generadas — continúa desde donde quedaste`; }
+  } catch(e) {}
+}
+
+document.getElementById('s-pending').textContent = ALL_PAIRS.length;
+renderGroups();
+
+// Restaurar íconos
+if (saved) {
+  try {
+    const r = JSON.parse(saved);
+    Object.keys(r).forEach(i => {
+      const el = document.getElementById('item-'+i);
+      if (el) { el.className='item done'; el.textContent='✅ '+ALL_PAIRS[i].theme; }
+    });
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
