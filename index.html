@@ -561,36 +561,50 @@
 
     /* ── Estrellas animadas ── */
     (function() {
-      const canvas = document.getElementById('stars-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      const stars = Array.from({length: 80}, () => ({
-        x: Math.random(), y: Math.random(),
-        size: Math.random() * 2 + 0.5,
-        speed: Math.random() * 0.3 + 0.1,
-        opacity: Math.random() * 0.8 + 0.2
-      }));
+      function initStars() {
+        const canvas = document.getElementById('stars-canvas');
+        if (!canvas) return;
+        const hero = canvas.closest('.hero') || canvas.parentElement;
+        const ctx = canvas.getContext('2d');
 
-      function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-      }
-      resize();
-      window.addEventListener('resize', resize);
+        function resize() {
+          canvas.width = hero.offsetWidth || window.innerWidth;
+          canvas.height = hero.offsetHeight || window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
 
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        stars.forEach(s => {
-          s.y -= s.speed * 0.001;
-          if (s.y < 0) { s.y = 1; s.x = Math.random(); }
-          ctx.beginPath();
-          ctx.arc(s.x * canvas.width, s.y * canvas.height, s.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(212,175,90,${s.opacity})`;
-          ctx.fill();
-        });
-        requestAnimationFrame(draw);
+        const stars = Array.from({length: 120}, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: Math.random() * 2.5 + 0.5,
+          speed: Math.random() * 0.4 + 0.1,
+          opacity: Math.random() * 0.7 + 0.2
+        }));
+
+        function draw() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          stars.forEach(s => {
+            s.y -= s.speed;
+            if (s.y < 0) {
+              s.y = canvas.height;
+              s.x = Math.random() * canvas.width;
+            }
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(212,175,90,${s.opacity})`;
+            ctx.fill();
+          });
+          requestAnimationFrame(draw);
+        }
+        draw();
       }
-      draw();
+      // Esperar a que el DOM esté listo
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStars);
+      } else {
+        setTimeout(initStars, 100);
+      }
     })();
 
     /* ── Activar trial al primer acceso ── */
