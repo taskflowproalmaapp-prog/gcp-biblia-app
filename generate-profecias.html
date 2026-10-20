@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generar Profecías — Admin</title>
+<style>
+  body{background:#0B0E14;color:#F5F0E8;font-family:system-ui;padding:20px;max-width:900px;margin:0 auto;}
+  h1{color:#D4AF5A;margin-bottom:8px;}
+  p{color:#8892a4;margin-bottom:20px;}
+  .btn{background:#D4AF5A;color:#0B0E14;border:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-right:10px;margin-bottom:10px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn-outline{background:none;border:1px solid rgba(212,175,90,.4);color:#D4AF5A;}
+  .progress{background:#131720;border-radius:10px;padding:20px;margin-bottom:20px;}
+  .progress-bar-wrap{background:rgba(212,175,90,.1);border-radius:4px;height:8px;margin:12px 0;}
+  .progress-bar{background:#D4AF5A;height:100%;border-radius:4px;transition:width .3s;}
+  .stats{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap;}
+  .stat{background:#131720;border-radius:8px;padding:12px 16px;text-align:center;}
+  .stat-num{font-size:24px;font-weight:700;color:#D4AF5A;}
+  .stat-label{font-size:12px;color:#8892a4;}
+  .list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:20px;}
+  .item{background:#131720;border:1px solid rgba(212,175,90,.1);border-radius:8px;padding:10px 14px;font-size:13px;display:flex;align-items:center;gap:8px;}
+  .item.done{border-color:rgba(100,200,100,.4);color:#81c784;}
+  .item.error{border-color:rgba(255,100,100,.4);color:#e57373;}
+  .item.active{border-color:#D4AF5A;color:#D4AF5A;}
+  .output{background:#131720;border:1px solid rgba(212,175,90,.2);border-radius:8px;padding:16px;font-size:12px;font-family:monospace;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<h1>🔮 Generador de Profecías Mesiánicas</h1>
+<p>Genera análisis teológicos completos para las 31 profecías con Gemini IA. Cada una tendrá contexto histórico, significado en el AT, cumplimiento en Cristo, impacto teológico y aplicación práctica.</p>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="s-done">0</div><div class="stat-label">Generadas</div></div>
+  <div class="stat"><div class="stat-num" id="s-error">0</div><div class="stat-label">Errores</div></div>
+  <div class="stat"><div class="stat-num" id="s-pending">31</div><div class="stat-label">Pendientes</div></div>
+  <div class="stat"><div class="stat-num" id="s-time">—</div><div class="stat-label">Tiempo restante</div></div>
+</div>
+
+<div class="progress">
+  <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+    <span id="p-label" style="color:#D4AF5A;font-weight:600">Listo para generar</span>
+    <span id="p-pct" style="color:#8892a4">0%</span>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="p-bar" style="width:0%"></div></div>
+  <div style="color:#8892a4;font-size:13px" id="p-text">Haz clic en "Generar Todas" para comenzar.</div>
+</div>
+
+<button class="btn" id="btn-start" onclick="start()">▶ Generar Todas (31 profecías)</button>
+<button class="btn btn-outline" id="btn-stop" onclick="stop()" disabled>⏹ Detener</button>
+<button class="btn btn-outline" onclick="download()" id="btn-dl" disabled>⬇ Descargar profecias.json</button>
+
+<div class="list" id="list"></div>
+
+<div id="out-section" style="display:none">
+  <h3 style="color:#D4AF5A;margin-bottom:8px">📄 JSON generado (muestra)</h3>
+  <div class="output" id="output"></div>
+  <button class="btn" onclick="copyAll()">📋 Copiar JSON completo</button>
+</div>
+
+<script>
+const PAIRS_BASE = [
+  {cat:'nacimiento',theme:'La simiente de la mujer',p:{ref:'Génesis 3:15',bookId:'gn',chapter:3,text:'«Esta te herirá en la cabeza, y tú le herirás en el calcañar.»'},f:{ref:'Gálatas 4:4',bookId:'ga',chapter:4,text:'«Cuando vino el cumplimiento del tiempo, Dios envió a su Hijo, nacido de mujer…»'},note:'La primera promesa de la Biblia anuncia al que vencería a Satanás: nace de mujer para destruir las obras del diablo.'},
+  {cat:'nacimiento',theme:'Descendiente de Abraham',p:{ref:'Génesis 12:3',bookId:'gn',chapter:12,text:'«En ti serán benditas todas las familias de la tierra.»'},f:{ref:'Mateo 1:1',bookId:'mt',chapter:1,text:'«Libro de la genealogía de Jesucristo, hijo de David, hijo de Abraham.»'},note:'Dios promete a Abraham que en su simiente serán benditas todas las naciones.'},
+  {cat:'nacimiento',theme:'De la tribu de Judá',p:{ref:'Génesis 49:10',bookId:'gn',chapter:49,text:'«No será quitado el cetro de Judá…hasta que venga Siloh.»'},f:{ref:'Lucas 3:33',bookId:'lc',chapter:3,text:'«…hijo de Aminadab, hijo de Aram, hijo de Esrom, hijo de Fares, hijo de Judá…»'},note:'El cetro mesiánico pertenece a Judá; Jesús desciende directamente de esa tribu.'},
+  {cat:'nacimiento',theme:'Nacido en Belén',p:{ref:'Miqueas 5:2',bookId:'mi',chapter:5,text:'«Pero tú, Belén Efrata…de ti me saldrá el que será Señor en Israel.»'},f:{ref:'Lucas 2:4-7',bookId:'lc',chapter:2,text:'«Y José subió…a Belén…para que fuese empadronado con María…y dio a luz a su hijo primogénito.»'},note:'Miqueas predijo con 700 años de anticipación la ciudad exacta del nacimiento del Mesías.'},
+  {cat:'nacimiento',theme:'Nacido de una virgen',p:{ref:'Isaías 7:14',bookId:'is',chapter:7,text:'«He aquí que la virgen concebirá, y dará a luz un hijo, y llamará su nombre Emanuel.»'},f:{ref:'Mateo 1:22-23',bookId:'mt',chapter:1,text:'«Todo esto aconteció para que se cumpliese lo dicho por el Señor por medio del profeta, cuando dijo: He aquí, una virgen concebirá…»'},note:'El nacimiento virginal es la señal definitiva de la intervención sobrenatural de Dios en la historia.'},
+  {cat:'nacimiento',theme:'Huida a Egipto',p:{ref:'Oseas 11:1',bookId:'os',chapter:11,text:'«De Egipto llamé a mi hijo.»'},f:{ref:'Mateo 2:14-15',bookId:'mt',chapter:2,text:'«Y él, despertando, tomó de noche al niño y a su madre, y se fue a Egipto…para que se cumpliese lo que dijo el Señor por medio del profeta, que dice: De Egipto llamé a mi Hijo.»'},note:'La huida a Egipto recapitula la historia de Israel; Jesús es el verdadero Israel que sale de Egipto.'},
+  {cat:'nacimiento',theme:'La matanza de los inocentes',p:{ref:'Jeremías 31:15',bookId:'jer',chapter:31,text:'«Voz fue oída en Ramá…Raquel que llora a sus hijos, y no quiso ser consolada acerca de sus hijos, porque perecieron.»'},f:{ref:'Mateo 2:16-18',bookId:'mt',chapter:2,text:'«Entonces Herodes…mató a todos los niños menores de dos años…Entonces se cumplió lo que fue dicho por el profeta Jeremías.»'},note:'El llanto de Ramá se cumple en la masacre de Belén, conectando el exilio de Israel con el rechazo del Mesías.'},
+  {cat:'ministerio',theme:'Precedido por un mensajero',p:{ref:'Malaquías 3:1',bookId:'mal',chapter:3,text:'«He aquí, yo envío mi mensajero, el cual preparará el camino delante de mí.»'},f:{ref:'Marcos 1:2-4',bookId:'mr',chapter:1,text:'«Como está escrito en el profeta…He aquí yo envío mi mensajero delante de tu faz…Juan bautizaba en el desierto.»'},note:'Juan el Bautista es el mensajero prometido que prepara el camino del Señor.'},
+  {cat:'ministerio',theme:'Su ministerio en Galilea',p:{ref:'Isaías 9:1-2',bookId:'is',chapter:9,text:'«El pueblo que andaba en tinieblas vio gran luz; los que moraban en tierra de sombra de muerte, luz resplandeció sobre ellos.»'},f:{ref:'Mateo 4:13-16',bookId:'mt',chapter:4,text:'«Y dejando a Nazaret, vino y habitó en Capernaum…para que se cumpliese lo dicho por el profeta Isaías.»'},note:'Jesús comenzó su ministerio en la región más despreciada de Israel, cumpliendo la profecía de Isaías.'},
+  {cat:'ministerio',theme:'Entrada triunfal a Jerusalén',p:{ref:'Zacarías 9:9',bookId:'zac',chapter:9,text:'«Alégrate mucho…He aquí tu rey vendrá a ti, justo y salvador, humilde, montado sobre un asno.»'},f:{ref:'Mateo 21:4-5',bookId:'mt',chapter:21,text:'«Todo esto aconteció para que se cumpliese lo dicho por el profeta…He aquí, tu Rey viene a ti, manso, y sentado sobre una asna.»'},note:'La entrada en burro simboliza la realeza humilde y pacífica del Mesías, en contraste con los reyes que entran a caballo.'},
+  {cat:'ministerio',theme:'Limpieza del templo',p:{ref:'Salmos 69:9',bookId:'sal',chapter:69,text:'«Porque me consumió el celo de tu casa.»'},f:{ref:'Juan 2:17',bookId:'jn',chapter:2,text:'«Entonces sus discípulos recordaron que está escrito: El celo de tu casa me consume.»'},note:'El celo de Jesús por la santidad del templo cumple la pasión del salmista por la casa de Dios.'},
+  {cat:'ministerio',theme:'Sanidades y milagros',p:{ref:'Isaías 35:5-6',bookId:'is',chapter:35,text:'«Entonces los ojos de los ciegos serán abiertos, y los oídos de los sordos se abrirán…»'},f:{ref:'Mateo 11:4-5',bookId:'mt',chapter:11,text:'«Respondiendo Jesús, les dijo: Id, y haced saber a Juan las cosas que oís y veis: Los ciegos ven, los cojos andan…»'},note:'Los milagros de Jesús son la evidencia directa de que el reino mesiánico prometido por Isaías ha llegado.'},
+  {cat:'ministerio',theme:'Enseñó en parábolas',p:{ref:'Salmos 78:2',bookId:'sal',chapter:78,text:'«Abriré mi boca en proverbios; hablaré cosas escondidas desde tiempos antiguos.»'},f:{ref:'Mateo 13:34-35',bookId:'mt',chapter:13,text:'«Todo esto habló Jesús por parábolas a la gente…para que se cumpliese lo dicho por el profeta.»'},note:'El método pedagógico de Jesús mediante parábolas fue profetizado mil años antes por el salmista.'},
+  {cat:'rechazo',theme:'Rechazado por los suyos',p:{ref:'Isaías 53:3',bookId:'is',chapter:53,text:'«Despreciado y desechado entre los hombres, varón de dolores…»'},f:{ref:'Juan 1:11',bookId:'jn',chapter:1,text:'«A lo suyo vino, y los suyos no le recibieron.»'},note:'El Siervo sufriente de Isaías 53 es el retrato más detallado del Mesías rechazado, escrito 700 años antes.'},
+  {cat:'rechazo',theme:'Traición por 30 piezas de plata',p:{ref:'Zacarías 11:12-13',bookId:'zac',chapter:11,text:'«Y le pesaron por mi salario treinta piezas de plata…las eché en la casa de Jehová al alfarero.»'},f:{ref:'Mateo 26:15',bookId:'mt',chapter:26,text:'«¿Qué me queréis dar, y yo os lo entregaré? Y ellos le asignaron treinta piezas de plata.»'},note:'La cantidad exacta de la traición y su destino final fueron profetizados con precisión asombrosa.'},
+  {cat:'rechazo',theme:'Discípulos huyen',p:{ref:'Zacarías 13:7',bookId:'zac',chapter:13,text:'«Hiere al pastor, y serán dispersadas las ovejas.»'},f:{ref:'Mateo 26:31',bookId:'mt',chapter:26,text:'«Entonces Jesús les dijo: Todos vosotros os escandalizaréis de mí esta noche; porque escrito está: Heriré al pastor, y las ovejas del rebaño serán dispersadas.»'},note:'Jesús mismo cita esta profecía en el Getsemaní, identificándose como el pastor herido.'},
+  {cat:'rechazo',theme:'Acusado en falso silencio',p:{ref:'Isaías 53:7',bookId:'is',chapter:53,text:'«Angustiado él, y afligido, no abrió su boca; como cordero fue llevado al matadero.»'},f:{ref:'Mateo 27:12-14',bookId:'mt',chapter:27,text:'«Y siendo acusado por los principales sacerdotes y por los ancianos, nada respondió…y nada respondió, ni a una sola palabra.»'},note:'El silencio de Jesús ante sus acusadores es la realización del cordero que no abre la boca.'},
+  {cat:'muerte',theme:'Las manos y los pies horadados',p:{ref:'Salmos 22:16',bookId:'sal',chapter:22,text:'«Porque perros me han rodeado; me ha cercado cuadrilla de malignos; horadaron mis manos y mis pies.»'},f:{ref:'Juan 20:25-27',bookId:'jn',chapter:20,text:'«Si no viere en sus manos la señal de los clavos…Entonces dice a Tomás: Pon aquí tu dedo, y mira mis manos.»'},note:'El Salmo 22 describe la crucifixión con detalles imposibles de conocer, escritos 1000 años antes de que Roma inventara ese método de ejecución.'},
+  {cat:'muerte',theme:'Echaron suertes por su ropa',p:{ref:'Salmos 22:18',bookId:'sal',chapter:22,text:'«Repartieron entre sí mis vestidos, y sobre mi ropa echaron suertes.»'},f:{ref:'Juan 19:23-24',bookId:'jn',chapter:19,text:'«Cuando los soldados crucificaron a Jesús, tomaron sus vestidos…y echaron suertes sobre ella.»'},note:'El detalle exacto de las suertes por la ropa fue profetizado con mil años de anticipación.'},
+  {cat:'muerte',theme:'Dado a beber vinagre',p:{ref:'Salmos 69:21',bookId:'sal',chapter:69,text:'«Me pusieron además hiel por comida, y en mi sed me dieron a beber vinagre.»'},f:{ref:'Juan 19:29-30',bookId:'jn',chapter:19,text:'«Y al instante uno de ellos tomó una esponja, y la empapó de vinagre…y se lo dio a beber.»'},note:'Incluso el detalle del vinagre en la cruz fue registrado con precisión profética.'},
+  {cat:'muerte',theme:'Ningún hueso quebrado',p:{ref:'Salmos 34:20',bookId:'sal',chapter:34,text:'«Él guarda todos sus huesos; ni uno de ellos será quebrantado.»'},f:{ref:'Juan 19:33-36',bookId:'jn',chapter:19,text:'«Mas cuando llegaron a Jesús, como le vieron ya muerto, no le quebraron las piernas…Para que se cumpliese la Escritura.»'},note:'La práctica romana de quebrar las piernas para acelerar la muerte fue evitada por la providencia de Dios.'},
+  {cat:'muerte',theme:'Traspasado el costado',p:{ref:'Zacarías 12:10',bookId:'zac',chapter:12,text:'«Y mirarán a mí, a quien traspasaron.»'},f:{ref:'Juan 19:34-37',bookId:'jn',chapter:19,text:'«Pero uno de los soldados le abrió el costado con una lanza…Y el que lo vio da testimonio…Y también otra escritura dice: Mirarán al que traspasaron.»'},note:'La lanzada en el costado de Cristo cumple la profecía de Zacarías sobre el traspasado.'},
+  {cat:'muerte',theme:'Sepultado con los ricos',p:{ref:'Isaías 53:9',bookId:'is',chapter:53,text:'«Y se dispuso con los impíos su sepultura, mas con los ricos fue en su muerte.»'},f:{ref:'Mateo 27:57-60',bookId:'mt',chapter:27,text:'«Cuando llegó la noche, vino un hombre rico de Arimatea, llamado José…y lo puso en su sepulcro nuevo.»'},note:'José de Arimatea, hombre rico, proveyó el sepulcro, cumpliendo exactamente la profecía de Isaías.'},
+  {cat:'muerte',theme:'Abandonado por Dios',p:{ref:'Salmos 22:1',bookId:'sal',chapter:22,text:'«Dios mío, Dios mío, ¿por qué me has abandonado?»'},f:{ref:'Mateo 27:46',bookId:'mt',chapter:27,text:'«Cerca de la hora novena, Jesús clamó a gran voz, diciendo: Eli, Eli, ¿lama sabactani? Esto es: Dios mío, Dios mío, ¿por qué me has desamparado?»'},note:'Jesús cita las primeras palabras del Salmo 22 desde la cruz, identificándose como el sufriente del salmo.'},
+  {cat:'resurreccion',theme:'No vería corrupción',p:{ref:'Salmos 16:10',bookId:'sal',chapter:16,text:'«Porque no dejarás mi alma en el Seol, ni permitirás que tu santo vea corrupción.»'},f:{ref:'Hechos 2:31',bookId:'hch',chapter:2,text:'«Viéndolo antes, habló de la resurrección de Cristo, que su alma no fue dejada en el Hades, ni su carne vio corrupción.»'},note:'Pedro explica en Pentecostés que David profetizó la resurrección de Cristo, no la suya propia.'},
+  {cat:'resurreccion',theme:'Resurrección al tercer día',p:{ref:'Oseas 6:2',bookId:'os',chapter:6,text:'«Nos dará vida después de dos días; en el tercer día nos resucitará, y viviremos delante de él.»'},f:{ref:'1 Corintios 15:4',bookId:'1co',chapter:15,text:'«Y que fue sepultado, y que resucitó al tercer día, conforme a las Escrituras.»'},note:'Pablo cita específicamente "conforme a las Escrituras" al hablar de la resurrección al tercer día.'},
+  {cat:'resurreccion',theme:'Ascensión a la diestra de Dios',p:{ref:'Salmos 110:1',bookId:'sal',chapter:110,text:'«Jehová dijo a mi Señor: Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado de tus pies.»'},f:{ref:'Hechos 2:34-35',bookId:'hch',chapter:2,text:'«Porque David no subió a los cielos; pero él mismo dice: Dijo el Señor a mi Señor: Siéntate a mi diestra, hasta que ponga a tus enemigos por estrado de tus pies.»'},note:'Pedro cita el Salmo 110 para demostrar que Jesús, no David, es el Señor exaltado a la diestra del Padre.'},
+  {cat:'resurreccion',theme:'Enviará al Espíritu Santo',p:{ref:'Joel 2:28',bookId:'jl',chapter:2,text:'«Y después de esto derramaré mi Espíritu sobre toda carne.»'},f:{ref:'Hechos 2:16-17',bookId:'hch',chapter:2,text:'«Mas esto es lo dicho por el profeta Joel: Y en los postreros días, dice Dios, derramaré de mi Espíritu sobre toda carne.»'},note:'El derramamiento del Espíritu en Pentecostés es el cumplimiento directo de la profecía de Joel.'},
+  {cat:'reino',theme:'Rey eterno en el trono de David',p:{ref:'Isaías 9:6-7',bookId:'is',chapter:9,text:'«Porque un niño nos es nacido…el principado sobre su hombro…y lo dilatado de su imperio y la paz no tendrán límite, sobre el trono de David.»'},f:{ref:'Lucas 1:32-33',bookId:'lc',chapter:1,text:'«Este será grande, y será llamado Hijo del Altísimo; y el Señor Dios le dará el trono de David su padre; y reinará sobre la casa de Jacob para siempre.»'},note:'El ángel Gabriel anuncia a María el cumplimiento de Isaías 9: Jesús es el rey eterno en el trono de David.'},
+  {cat:'reino',theme:'Sacerdote eterno según Melquisedec',p:{ref:'Salmos 110:4',bookId:'sal',chapter:110,text:'«Juró Jehová, y no se arrepentirá: Tú eres sacerdote para siempre según el orden de Melquisedec.»'},f:{ref:'Hebreos 6:20',bookId:'heb',chapter:6,text:'«donde Jesús entró por nosotros como precursor, hecho sumo sacerdote para siempre según el orden de Melquisedec.»'},note:'Jesús une en sí mismo los roles de rey y sacerdote, como Melquisedec, el sacerdote-rey de Génesis.'},
+  {cat:'reino',theme:'Las naciones le adorarán',p:{ref:'Isaías 49:6',bookId:'is',chapter:49,text:'«Te di también por luz de las gentes, para que seas mi salvación hasta lo postrero de la tierra.»'},f:{ref:'Hechos 13:47',bookId:'hch',chapter:13,text:'«Porque así nos ha mandado el Señor, diciendo: Te he puesto para luz de los gentiles, a fin de que seas para salvación hasta lo último de la tierra.»'},note:'Pablo cita esta profecía para justificar la misión a los gentiles: el Mesías es luz para todas las naciones.'},
+  {cat:'reino',theme:'Su reino no tendrá fin',p:{ref:'Daniel 7:14',bookId:'dn',chapter:7,text:'«Y le fue dado dominio, gloria y reino, para que todos los pueblos, naciones y lenguas le sirvieran; su dominio es dominio eterno, que nunca pasará.»'},f:{ref:'Apocalipsis 11:15',bookId:'ap',chapter:11,text:'«Los reinos del mundo han venido a ser de nuestro Señor y de su Cristo; y él reinará por los siglos de los siglos.»'},note:'La visión de Daniel del Hijo del Hombre recibiendo el reino eterno se cumple en Cristo y se consumará en su segunda venida.'}
+];
+
+let results = {};
+let running = false;
+let startTime = null;
+
+function renderList() {
+  const list = document.getElementById('list');
+  list.innerHTML = PAIRS_BASE.map((p,i) => `
+    <div class="item" id="item-${i}">
+      <span id="icon-${i}">⬜</span>
+      <span style="font-size:12px">${p.theme}</span>
+    </div>`).join('');
+}
+
+async function generateProphecy(pair, idx) {
+  const prompt = `Eres un teólogo experto en Biblia Reina Valera 1960 y en profecías mesiánicas. Analiza esta profecía mesiánica de forma PROFUNDA y COMPLETA.
+
+PROFECÍA: "${pair.theme}"
+- Texto AT (${pair.p.ref}): ${pair.p.text}
+- Texto NT (${pair.f.ref}): ${pair.f.text}
+
+Responde SOLO con este JSON exacto, sin texto adicional ni markdown:
+{
+  "historical_context": "Contexto histórico detallado: cuándo fue escrita, quién profetizó, situación de Israel en ese momento, por qué es significativa (3-4 oraciones)",
+  "at_meaning": "Qué entendían los judíos de esta profecía, cómo la interpretaban antes del cumplimiento, qué esperaban (2-3 oraciones)",
+  "fulfillment_detail": "Cómo se cumplió exactamente en Jesús, los detalles específicos del cumplimiento, qué hace esto imposible de ser coincidencia (3-4 oraciones)",
+  "theological_impact": "Impacto teológico profundo: qué revela sobre la naturaleza de Dios, su plan redentor, la unidad de la Biblia, la identidad de Cristo (3-4 oraciones)",
+  "practical_application": "Qué significa para el creyente hoy, cómo esta profecía fortalece la fe, aplicación personal (2-3 oraciones)",
+  "key_insight": "Una verdad central y memorable que resume el poder de esta profecía (1 oración impactante)"
+}`;
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const resp = await fetch('/.netlify/functions/ai', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({prompt, maxTokens: 1200})
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      let clean = data.text.replace(/```json|```/g,'').trim();
+      const s = clean.indexOf('{'), e = clean.lastIndexOf('}');
+      if (s < 0 || e < 0) throw new Error('JSON inválido');
+      return JSON.parse(clean.substring(s, e+1));
+    } catch(err) {
+      if (attempt < 2) await new Promise(r => setTimeout(r, 3000));
+      else throw err;
+    }
+  }
+}
+
+async function start() {
+  running = true;
+  startTime = Date.now();
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
+
+  // Restaurar progreso previo
+  const saved = localStorage.getItem('gen_profecias');
+  if (saved) {
+    try { results = JSON.parse(saved); } catch(e) { results = {}; }
+  }
+
+  let done = Object.keys(results).length;
+  let errors = 0;
+
+  for (let i = 0; i < PAIRS_BASE.length; i++) {
+    if (!running) break;
+    if (results[i]) {
+      document.getElementById('icon-'+i).textContent = '✅';
+      document.getElementById('item-'+i).className = 'item done';
+      continue;
+    }
+
+    const pair = PAIRS_BASE[i];
+    document.getElementById('icon-'+i).textContent = '⏳';
+    document.getElementById('item-'+i).className = 'item active';
+    document.getElementById('p-label').textContent = `Generando: ${pair.theme}...`;
+    document.getElementById('p-text').textContent = `${i+1} de ${PAIRS_BASE.length}`;
+    const pct = Math.round(i/PAIRS_BASE.length*100);
+    document.getElementById('p-bar').style.width = pct+'%';
+    document.getElementById('p-pct').textContent = pct+'%';
+
+    try {
+      const theology = await generateProphecy(pair, i);
+      results[i] = {...pair, theology};
+      done++;
+      document.getElementById('icon-'+i).textContent = '✅';
+      document.getElementById('item-'+i).className = 'item done';
+      localStorage.setItem('gen_profecias', JSON.stringify(results));
+    } catch(err) {
+      errors++;
+      document.getElementById('icon-'+i).textContent = '❌';
+      document.getElementById('item-'+i).className = 'item error';
+      console.error(pair.theme, err);
+    }
+
+    document.getElementById('s-done').textContent = done;
+    document.getElementById('s-error').textContent = errors;
+    document.getElementById('s-pending').textContent = PAIRS_BASE.length - i - 1;
+    const elapsed = (Date.now()-startTime)/1000;
+    const perItem = elapsed/(i+1);
+    document.getElementById('s-time').textContent = Math.round(perItem*(PAIRS_BASE.length-i-1))+'s';
+
+    if (i < PAIRS_BASE.length-1) await new Promise(r => setTimeout(r, 2000));
+  }
+
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  document.getElementById('btn-dl').disabled = false;
+  document.getElementById('p-bar').style.width = '100%';
+  document.getElementById('p-pct').textContent = '100%';
+  document.getElementById('p-label').textContent = `✅ Completado — ${done} generadas`;
+
+  const json = buildFinalJSON();
+  document.getElementById('out-section').style.display = 'block';
+  document.getElementById('output').textContent = JSON.stringify(json,null,2).substring(0,3000)+'...';
+}
+
+function buildFinalJSON() {
+  const cats = [
+    {key:'nacimiento',label:'Nacimiento y origen'},
+    {key:'ministerio',label:'Vida y ministerio'},
+    {key:'rechazo',label:'Rechazo y traición'},
+    {key:'muerte',label:'Sufrimiento y muerte'},
+    {key:'resurreccion',label:'Resurrección y exaltación'},
+    {key:'reino',label:'El Reino del Mesías'}
+  ];
+  const pairs = PAIRS_BASE.map((p,i) => {
+    const r = results[i];
+    return {
+      cat: p.cat, theme: p.theme,
+      prophecy: {ref:p.p.ref, bookId:p.p.bookId, chapter:p.p.chapter, text:p.p.text},
+      fulfillment: {ref:p.f.ref, bookId:p.f.bookId, chapter:p.f.chapter, text:p.f.text},
+      note: p.note,
+      theology: r ? r.theology : null
+    };
+  });
+  return {cats, pairs};
+}
+
+function stop() {
+  running = false;
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
+  if (Object.keys(results).length > 0) document.getElementById('btn-dl').disabled = false;
+}
+
+function download() {
+  const json = buildFinalJSON();
+  const blob = new Blob([JSON.stringify(json,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'profecias.json';
+  a.click();
+}
+
+function copyAll() {
+  navigator.clipboard.writeText(JSON.stringify(buildFinalJSON(),null,2))
+    .then(() => alert('JSON copiado'));
+}
+
+// Restaurar estado visual al cargar
+const saved = localStorage.getItem('gen_profecias');
+if (saved) {
+  try {
+    results = JSON.parse(saved);
+    const n = Object.keys(results).length;
+    if (n > 0) {
+      document.getElementById('s-done').textContent = n;
+      document.getElementById('s-pending').textContent = 31-n;
+      document.getElementById('btn-dl').disabled = false;
+      document.getElementById('p-label').textContent = `${n} ya generadas — puedes continuar`;
+    }
+  } catch(e) {}
+}
+
+renderList();
+
+// Restaurar íconos
+if (saved) {
+  try {
+    const r = JSON.parse(saved);
+    Object.keys(r).forEach(i => {
+      const icon = document.getElementById('icon-'+i);
+      const item = document.getElementById('item-'+i);
+      if (icon) icon.textContent = '✅';
+      if (item) item.className = 'item done';
+    });
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
