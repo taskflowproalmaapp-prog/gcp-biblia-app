@@ -62,6 +62,21 @@
     .prof-inline-ref{color:var(--gold);font-size:12px;font-weight:700;margin-bottom:6px;}
     .prof-inline-text{color:var(--text);font-size:14px;line-height:1.8;font-family:Georgia,serif;}
     .prof-inline-loading{color:var(--text2);font-size:13px;font-style:italic;}
+    /* Teología */
+    .prof-theology{padding:0 20px 20px;}
+    .prof-theology-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+    .prof-th-card{background:rgba(212,175,90,.04);border:1px solid rgba(212,175,90,.1);border-radius:10px;padding:14px;}
+    .prof-th-label{color:var(--gold);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+    .prof-th-text{color:var(--text);font-size:13px;line-height:1.75;}
+    .prof-key-insight{background:linear-gradient(135deg,rgba(212,175,90,.12),rgba(212,175,90,.06));
+      border:1px solid rgba(212,175,90,.3);border-radius:10px;padding:16px;margin-top:10px;text-align:center;}
+    .prof-key-icon{font-size:20px;margin-bottom:6px;}
+    .prof-key-text{color:var(--gold);font-size:15px;font-family:Georgia,serif;font-style:italic;line-height:1.6;}
+    .prof-note-simple{background:rgba(212,175,90,.05);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:12px;}
+    .prof-note-simple-text{color:var(--text2);font-size:13px;line-height:1.7;font-style:italic;}
+    @media(max-width:600px){
+      .prof-theology-grid{grid-template-columns:1fr;}
+    }
     @media(max-width:600px){
       .prof-pair{grid-template-columns:1fr;gap:10px;}
       .prof-arrow{transform:rotate(90deg);}
@@ -154,9 +169,8 @@
               <div class="prof-inline-verse" id="pverse-${idx}-f"></div>
             </div>
           </div>
-          <div class="prof-note">
-            <div class="prof-note-label">✦ Significado teológico</div>
-            <div class="prof-note-text">${esc(pair.note)}</div>
+          <div class="prof-theology">
+            ${buildTheology(pair)}
           </div>
         </div>
       </div>`;
@@ -208,6 +222,63 @@
   function setCat(key) {
     activeCat = key;
     render();
+  }
+
+  function buildTheology(pair) {
+    const t = pair.theology;
+    let h = '';
+
+    // Nota simple (resumen corto original)
+    if (pair.note) {
+      h += `<div class="prof-note-simple">
+        <div class="prof-th-label">✦ Resumen</div>
+        <div class="prof-note-simple-text">${esc(pair.note)}</div>
+      </div>`;
+    }
+
+    if (!t) return h;
+
+    h += '<div class="prof-theology-grid">';
+
+    if (t.historical_context) h += `
+      <div class="prof-th-card">
+        <div class="prof-th-label">📜 Contexto histórico</div>
+        <div class="prof-th-text">${esc(t.historical_context)}</div>
+      </div>`;
+
+    if (t.at_meaning) h += `
+      <div class="prof-th-card">
+        <div class="prof-th-label">🕍 Significado en el AT</div>
+        <div class="prof-th-text">${esc(t.at_meaning)}</div>
+      </div>`;
+
+    if (t.fulfillment_detail) h += `
+      <div class="prof-th-card">
+        <div class="prof-th-label">✝️ Cumplimiento en Cristo</div>
+        <div class="prof-th-text">${esc(t.fulfillment_detail)}</div>
+      </div>`;
+
+    if (t.theological_impact) h += `
+      <div class="prof-th-card">
+        <div class="prof-th-label">🌟 Impacto teológico</div>
+        <div class="prof-th-text">${esc(t.theological_impact)}</div>
+      </div>`;
+
+    h += '</div>';
+
+    if (t.practical_application) h += `
+      <div class="prof-th-card" style="margin-bottom:10px;">
+        <div class="prof-th-label">💡 Aplicación práctica</div>
+        <div class="prof-th-text">${esc(t.practical_application)}</div>
+      </div>`;
+
+    if (t.key_insight) h += `
+      <div class="prof-key-insight">
+        <div class="prof-key-icon">✨</div>
+        <div class="prof-key-text">"${esc(t.key_insight)}"</div>
+      </div>`;
+
+    return h;
   }
 
   function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
