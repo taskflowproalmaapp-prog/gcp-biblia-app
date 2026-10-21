@@ -157,6 +157,48 @@
       .nav-links{display:none;}
       .nav-hamburger{display:block;}
     }
+
+    /* ══ MÓVIL GLOBAL — sidebars como drawer ══ */
+    @media(max-width:700px) {
+
+      /* Sidebars de todos los módulos */
+      .chars-sidebar, .sum-sidebar, .reader-sidebar,
+      [class*="-sidebar"]{
+        position:fixed!important;top:56px!important;left:-100%!important;
+        bottom:0!important;width:80vw!important;max-width:300px!important;
+        z-index:300!important;transition:left .25s ease!important;
+        box-shadow:4px 0 20px rgba(0,0,0,.5)!important;
+      }
+      .chars-sidebar.mob-open, .sum-sidebar.mob-open,
+      .reader-sidebar.mob-open, [class*="-sidebar"].mob-open{
+        left:0!important;
+      }
+
+      /* El contenido principal ocupa todo el ancho */
+      .chars-wrap, .sum-wrap, .reader-wrap,
+      [class*="-wrap"]{flex-direction:column!important;}
+      .chars-main, .sum-main, .reader-main,
+      [class*="-main"]{width:100%!important;padding:16px!important;}
+
+      /* Botón para abrir sidebar en móvil */
+      .mob-sidebar-btn{
+        display:flex!important;align-items:center;gap:6px;
+        background:rgba(212,175,90,.1);border:1px solid rgba(212,175,90,.25);
+        color:var(--gold);padding:8px 14px;border-radius:8px;
+        cursor:pointer;font-size:13px;font-weight:600;margin-bottom:12px;
+      }
+
+      /* Overlay para sidebar */
+      .mob-sidebar-overlay{
+        display:none;position:fixed;inset:0;z-index:299;
+        background:rgba(0,0,0,.6);
+      }
+      .mob-sidebar-overlay.show{display:block;}
+
+      /* Ocultar layout de dos columnas */
+      .chars-wrap{height:auto!important;}
+      .chars-sidebar{height:calc(100vh - 56px)!important;overflow-y:auto!important;}
+    }
   </style>
 </head>
 <body>
@@ -450,6 +492,47 @@
       drawer.classList.toggle('open', !isOpen);
       if (overlay) overlay.classList.toggle('show', !isOpen);
       document.body.style.overflow = isOpen ? '' : 'hidden';
+    };
+
+    /* ── Sidebar móvil universal ── */
+    GCP.mobileSidebar = {
+      init(sidebarSel, triggerEl) {
+        if (window.innerWidth > 700) return;
+        const sidebar = document.querySelector(sidebarSel);
+        if (!sidebar) return;
+
+        // Crear overlay si no existe
+        let overlay = document.getElementById('mob-sidebar-ov');
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.id = 'mob-sidebar-ov';
+          overlay.className = 'mob-sidebar-overlay';
+          overlay.onclick = () => GCP.mobileSidebar.close();
+          document.body.appendChild(overlay);
+        }
+
+        // Crear botón de abrir
+        const btn = document.createElement('button');
+        btn.className = 'mob-sidebar-btn';
+        btn.innerHTML = '☰ Ver lista';
+        btn.style.cssText = 'display:none';
+        btn.onclick = () => GCP.mobileSidebar.open();
+        if (triggerEl) triggerEl.before(btn);
+
+        setTimeout(() => { btn.style.display = 'flex'; }, 100);
+        GCP.mobileSidebar._sidebar = sidebar;
+        GCP.mobileSidebar._overlay = overlay;
+      },
+      open() {
+        if (this._sidebar) this._sidebar.classList.add('mob-open');
+        if (this._overlay) this._overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      },
+      close() {
+        if (this._sidebar) this._sidebar.classList.remove('mob-open');
+        if (this._overlay) this._overlay.classList.remove('show');
+        document.body.style.overflow = '';
+      }
     };
 
     /* ── Toast notifications ── */
