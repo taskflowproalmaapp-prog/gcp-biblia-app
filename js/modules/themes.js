@@ -89,7 +89,7 @@
     .theme-btn-primary{background:var(--gold);color:#0B0E14;border-color:var(--gold);}
     .theme-btn-primary:hover{background:var(--gold-light);}
     @media(max-width:600px){
-      .themes-sidebar{width:180px;}
+      .themes-sidebar-DISABLED{width:180px;}
       .themes-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
     }`;
   document.head.appendChild(style);
