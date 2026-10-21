@@ -258,7 +258,7 @@ Responde SOLO con este JSON válido, sin texto extra:
     document.body.style.overflow = '';
   }
 
-  GCP.summaries = {
+  GCP.summaries = { toggleSidebar, closeSidebar,
     open, setT,
     _lastDeep: null,
     _lastBook: null,
