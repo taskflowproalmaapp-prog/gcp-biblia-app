@@ -110,16 +110,48 @@
     .music-btn.playing .music-bar span:nth-child(2){animation:bar .6s ease .2s infinite alternate;}
     .music-btn.playing .music-bar span:nth-child(3){animation:bar .9s ease .1s infinite alternate;}
     @keyframes bar{from{height:4px}to{height:14px}}
+    /* ── HAMBURGER & DRAWER MÓVIL ── */
     .nav-hamburger{display:none;background:none;border:none;color:var(--gold);
-      font-size:22px;cursor:pointer;margin-left:auto;}
-    .nav-mobile{display:none;position:fixed;top:56px;left:0;right:0;z-index:99;
-      background:rgba(11,14,20,.98);backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(212,175,90,.15);padding:12px;}
-    .nav-mobile.open{display:flex;flex-direction:column;gap:4px;}
-    .nav-mobile button{background:none;border:none;color:var(--text2);padding:10px 16px;
-      border-radius:6px;cursor:pointer;font-size:14px;text-align:left;transition:all .15s;}
-    .nav-mobile button:hover{background:rgba(212,175,90,.1);color:var(--gold);}
-    .nav-mobile .nav-pro{background:var(--gold);color:#0B0E14;font-weight:600;}
+      font-size:24px;cursor:pointer;padding:4px 8px;margin-left:auto;line-height:1;}
+
+    /* Drawer lateral */
+    .nav-drawer{position:fixed;top:0;left:-280px;bottom:0;width:280px;z-index:500;
+      background:rgba(11,14,20,.98);backdrop-filter:blur(16px);
+      border-right:1px solid rgba(212,175,90,.2);
+      transition:left .25s ease;overflow-y:auto;padding:0 0 40px;}
+    .nav-drawer.open{left:0;}
+    .nav-drawer-header{display:flex;align-items:center;justify-content:space-between;
+      padding:16px 20px;border-bottom:1px solid rgba(212,175,90,.15);}
+    .nav-drawer-title{color:var(--gold);font-size:14px;font-weight:700;letter-spacing:.5px;}
+    .nav-drawer-close{background:none;border:none;color:var(--text2);font-size:22px;
+      cursor:pointer;padding:4px;line-height:1;}
+    .nav-drawer button{display:block;width:100%;background:none;border:none;
+      color:var(--text2);padding:13px 20px;cursor:pointer;font-size:15px;
+      text-align:left;transition:all .15s;border-bottom:1px solid rgba(212,175,90,.05);}
+    .nav-drawer button:hover{background:rgba(212,175,90,.08);color:var(--gold);}
+    .nav-drawer .nav-pro{background:rgba(212,175,90,.15);color:var(--gold);font-weight:700;
+      margin:12px 16px;border-radius:8px;border:1px solid rgba(212,175,90,.3)!important;
+      width:calc(100% - 32px);}
+
+    /* Overlay */
+    .nav-overlay{display:none;position:fixed;inset:0;z-index:499;
+      background:rgba(0,0,0,.6);backdrop-filter:blur(2px);}
+    .nav-overlay.show{display:block;}
+
+    /* Texto en móvil sin justify */
+    @media(max-width:700px){
+      * { text-align: left !important; }
+      .hero { text-align: center !important; }
+      .hero * { text-align: center !important; }
+      p { text-align: left !important; line-height: 1.75 !important; }
+      .pricing-grid{grid-template-columns:1fr;}
+      .nav-links{display:none;}
+      .nav-hamburger{display:block;}
+      /* Botón música arriba en móvil */
+      .music-btn{bottom:auto;top:64px;right:12px;font-size:12px;padding:7px 12px;}
+      /* Floating speak button arriba */
+      body > div[style*="position:fixed"][style*="bottom:80px"]{bottom:auto!important;top:72px!important;}
+    }
     @media(max-width:900px){
       .pricing-grid{grid-template-columns:1fr;}
       .nav-links{display:none;}
@@ -156,21 +188,29 @@
     </div>
     <button class="nav-hamburger" onclick="GCP.toggleMenu()">☰</button>
   </nav>
-  <div class="nav-mobile" id="nav-mobile">
+  <!-- Overlay -->
+  <div class="nav-overlay" id="nav-overlay" onclick="GCP.toggleMenu()"></div>
+
+  <!-- Drawer lateral -->
+  <div class="nav-drawer" id="nav-drawer">
+    <div class="nav-drawer-header">
+      <span class="nav-drawer-title">✦ Generación con Propósito</span>
+      <button class="nav-drawer-close" onclick="GCP.toggleMenu()">✕</button>
+    </div>
     <button onclick="GCP.router.go('reader');GCP.toggleMenu()">📖 Leer la Biblia</button>
     <button onclick="GCP.router.go('search');GCP.toggleMenu()">🔍 Buscar Versículo</button>
     <button onclick="GCP.router.go('themes');GCP.toggleMenu()">💛 Temas y Necesidades</button>
-    <button onclick="GCP.router.go('summaries');GCP.toggleMenu()">📚 Resúmenes IA</button>
-    <button onclick="GCP.router.go('kids');GCP.toggleMenu()">🧒 Niños</button>
+    <button onclick="GCP.router.go('summaries');GCP.toggleMenu()">📚 Resúmenes Bíblicos</button>
+    <button onclick="GCP.router.go('kids');GCP.toggleMenu()">🧒 Estudio para Niños</button>
+    <button onclick="GCP.router.go('personajes');GCP.toggleMenu()">👤 Personajes Bíblicos</button>
+    <button onclick="GCP.router.go('profecias');GCP.toggleMenu()">🔮 Profecías Mesiánicas</button>
+    <button onclick="GCP.router.go('timeline');GCP.toggleMenu()">⏳ Línea de Tiempo</button>
+    <button onclick="GCP.router.go('sabias');GCP.toggleMenu()">💡 ¿Sabías que...?</button>
+    <button onclick="GCP.router.go('linaje');GCP.toggleMenu()">🌿 Linaje de Jesús</button>
     <button onclick="GCP.router.go('projection');GCP.toggleMenu()">📽️ Proyección</button>
     <button onclick="GCP.router.go('voice');GCP.toggleMenu()">🎤 Voz con IA</button>
     <button onclick="GCP.router.go('audio');GCP.toggleMenu()">🔊 Audio Biblia</button>
-    <button onclick="GCP.router.go('personajes');GCP.toggleMenu()">👤 Personajes</button>
-    <button onclick="GCP.router.go('timeline');GCP.toggleMenu()">⏳ Línea de Tiempo</button>
-    <button onclick="GCP.router.go('sabias');GCP.toggleMenu()">💡 ¿Sabías que...?</button>
-    <button onclick="GCP.router.go('profecias');GCP.toggleMenu()">🔮 Profecías</button>
-    <button onclick="GCP.router.go('linaje');GCP.toggleMenu()">🌿 Linaje de Jesús</button>
-    <button class="nav-pro" onclick="GCP.router.go('pro');GCP.toggleMenu()">⭐ Pro</button>
+    <button class="nav-pro" onclick="GCP.router.go('pro');GCP.toggleMenu()">⭐ Plan Pro</button>
   </div>
 
   <main>
@@ -403,8 +443,13 @@
 
     /* ── Menú móvil ── */
     GCP.toggleMenu = function() {
-      const m = document.getElementById('nav-mobile');
-      if (m) m.classList.toggle('open');
+      const drawer = document.getElementById('nav-drawer');
+      const overlay = document.getElementById('nav-overlay');
+      if (!drawer) return;
+      const isOpen = drawer.classList.contains('open');
+      drawer.classList.toggle('open', !isOpen);
+      if (overlay) overlay.classList.toggle('show', !isOpen);
+      document.body.style.overflow = isOpen ? '' : 'hidden';
     };
 
     /* ── Toast notifications ── */
