@@ -221,7 +221,27 @@
   }
 
   /* Exponer API pública */
-  GCP.reader = { openBook, renderChapter, prevChapter, nextChapter, goToChapter, setTestament };
+  function toggleSidebar() {
+    const sb = document.getElementById('reader-sidebar');
+    const ov = document.getElementById('reader-overlay');
+    const cl = document.getElementById('reader-close-btn');
+    if (!sb) return;
+    const isOpen = sb.classList.toggle('mob-open');
+    if (ov) ov.classList.toggle('show', isOpen);
+    if (cl) cl.style.display = isOpen ? 'block' : 'none';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeSidebar() {
+    const sb = document.getElementById('reader-sidebar');
+    const ov = document.getElementById('reader-overlay');
+    const cl = document.getElementById('reader-close-btn');
+    if (sb) sb.classList.remove('mob-open');
+    if (ov) ov.classList.remove('show');
+    if (cl) cl.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  GCP.reader = { toggleSidebar, closeSidebar, openBook, renderChapter, prevChapter, nextChapter, goToChapter, setTestament };
 
   /* Init: restaurar última posición */
   renderBookList();
