@@ -159,45 +159,71 @@
     }
 
     /* ══ MÓVIL GLOBAL — sidebars como drawer ══ */
-    @media(max-width:700px) {
 
-      /* Sidebars de todos los módulos */
-      .chars-sidebar, .sum-sidebar, .reader-sidebar,
+    /* Botón TAB en la orilla izquierda para abrir sidebar */
+    .mob-tab{
+      display:none;
+      position:fixed;left:0;top:50%;transform:translateY(-50%);
+      z-index:298;
+      background:var(--gold);color:#0B0E14;
+      writing-mode:vertical-rl;text-orientation:mixed;
+      padding:14px 6px;border-radius:0 8px 8px 0;
+      font-size:12px;font-weight:700;cursor:pointer;
+      letter-spacing:1px;border:none;
+      box-shadow:3px 0 12px rgba(212,175,90,.3);
+    }
+
+    /* Overlay para sidebar móvil */
+    .mob-sidebar-overlay{
+      display:none;position:fixed;inset:0;z-index:299;
+      background:rgba(0,0,0,.65);backdrop-filter:blur(2px);
+    }
+    .mob-sidebar-overlay.show{display:block;}
+
+    @media(max-width:700px) {
+      /* Mostrar tab */
+      .mob-tab{display:block;}
+
+      /* Sidebars OCULTAS por defecto */
+      .chars-sidebar, .sum-sidebar,
       [class*="-sidebar"]{
-        position:fixed!important;top:56px!important;left:-100%!important;
-        bottom:0!important;width:80vw!important;max-width:300px!important;
-        z-index:300!important;transition:left .25s ease!important;
-        box-shadow:4px 0 20px rgba(0,0,0,.5)!important;
+        position:fixed!important;
+        top:56px!important;left:-85vw!important;
+        bottom:0!important;width:85vw!important;max-width:320px!important;
+        z-index:300!important;
+        transition:left .28s cubic-bezier(.4,0,.2,1)!important;
+        box-shadow:4px 0 24px rgba(0,0,0,.6)!important;
+        overflow-y:auto!important;
       }
+      /* Sidebar abierta */
       .chars-sidebar.mob-open, .sum-sidebar.mob-open,
-      .reader-sidebar.mob-open, [class*="-sidebar"].mob-open{
+      [class*="-sidebar"].mob-open{
         left:0!important;
       }
+      /* Tab se oculta cuando sidebar está abierta */
+      .chars-sidebar.mob-open ~ .mob-tab,
+      .sum-sidebar.mob-open ~ .mob-tab{display:none;}
 
-      /* El contenido principal ocupa todo el ancho */
-      .chars-wrap, .sum-wrap, .reader-wrap,
-      [class*="-wrap"]{flex-direction:column!important;}
-      .chars-main, .sum-main, .reader-main,
-      [class*="-main"]{width:100%!important;padding:16px!important;}
-
-      /* Botón para abrir sidebar en móvil */
-      .mob-sidebar-btn{
-        display:flex!important;align-items:center;gap:6px;
-        background:rgba(212,175,90,.1);border:1px solid rgba(212,175,90,.25);
-        color:var(--gold);padding:8px 14px;border-radius:8px;
-        cursor:pointer;font-size:13px;font-weight:600;margin-bottom:12px;
+      /* Contenido ocupa todo el ancho */
+      .chars-wrap, .sum-wrap{
+        flex-direction:row!important;
+      }
+      .chars-main, .sum-main{
+        width:100%!important;
+        min-width:0!important;
+        padding:16px!important;
       }
 
-      /* Overlay para sidebar */
-      .mob-sidebar-overlay{
-        display:none;position:fixed;inset:0;z-index:299;
-        background:rgba(0,0,0,.6);
-      }
-      .mob-sidebar-overlay.show{display:block;}
+      /* Texto sin justify */
+      p, span, div{text-align:left!important;}
+      .hero, .hero *{text-align:center!important;}
 
-      /* Ocultar layout de dos columnas */
-      .chars-wrap{height:auto!important;}
-      .chars-sidebar{height:calc(100vh - 56px)!important;overflow-y:auto!important;}
+      /* Botón música arriba */
+      .music-btn{
+        bottom:auto!important;top:64px!important;
+        right:12px!important;font-size:11px!important;
+        padding:6px 10px!important;
+      }
     }
   </style>
 </head>
