@@ -76,7 +76,7 @@
   
 
   page.innerHTML = `
-      <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.summaries.closeSidebar()"></div>
+      <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.closeSidebar()"></div>
       <div class="mob-bar">
         <button class="mob-bar-btn" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
         <span class="mob-bar-title" id="sum-bar-title">Selecciona un libro</span>
@@ -87,7 +87,7 @@
           <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
           <button class="sum-filter-btn" onclick="GCP.summaries.setT('AT')">AT</button>
           <button class="sum-filter-btn" onclick="GCP.summaries.setT('NT')">NT</button>
-          <button id="sum-close-btn" onclick="GCP.summaries.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;margin-left:auto;padding:4px;">✕</button>
+          <button id="sum-close-btn" onclick="GCP.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;margin-left:auto;padding:4px;">✕</button>
         </div>
         <div id="sum-list"></div>
       </aside>
