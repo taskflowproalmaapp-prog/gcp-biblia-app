@@ -156,7 +156,7 @@
     .sum-ai-loading{text-align:center;padding:40px;color:var(--text2);}
     .sum-ai-loading p{margin-top:12px;font-size:14px;}
     .sum-ai-loading small{font-size:12px;opacity:.7;display:block;margin-top:4px;}
-    @media(max-width:600px){.sum-sidebar{width:160px;}.sum-main{padding:16px;}}`;
+    @media(max-width:600px){.sum-main{padding:16px;}}`;
   document.head.appendChild(style);
   function renderList() {
     const list = document.getElementById('sum-list');
