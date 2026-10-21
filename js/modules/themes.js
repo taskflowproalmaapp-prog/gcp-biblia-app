@@ -23,6 +23,23 @@
   const style = document.createElement('style');
   style.textContent = `
     .themes-wrap{display:flex;height:calc(100vh - 56px);}
+    @media(max-width:700px){
+      .themes-sidebar,.sum-sidebar,.chars-sidebar,.reader-sidebar{
+        position:fixed!important;top:56px!important;
+        left:-100%!important;bottom:0!important;
+        width:82vw!important;max-width:290px!important;
+        z-index:300!important;
+        transition:left .25s cubic-bezier(.4,0,.2,1)!important;
+        box-shadow:4px 0 30px rgba(0,0,0,.8)!important;
+        overflow-y:auto!important;
+      }
+      .themes-sidebar.mob-open,.sum-sidebar.mob-open,
+      .chars-sidebar.mob-open,.reader-sidebar.mob-open{
+        left:0!important;
+      }
+      .themes-grid-wrap{width:100%!important;padding:14px!important;}
+      .themes-wrap{flex-direction:column!important;height:auto!important;}
+    }
     .themes-sidebar{width:240px;flex-shrink:0;background:var(--surface);
       border-right:1px solid rgba(212,175,90,.1);overflow-y:auto;padding:16px 0;}
     .themes-search{padding:0 12px 12px;border-bottom:1px solid rgba(212,175,90,.1);}
@@ -79,8 +96,13 @@
 
   function renderShell() {
     page.innerHTML = `
+      <div class="mob-sidebar-overlay" id="themes-overlay" onclick="GCP.themes.closeSidebar()"></div>
+      <div class="mob-bar">
+        <button class="mob-bar-btn" onclick="GCP.themes.toggleSidebar()">☰ Temas</button>
+        <span class="mob-bar-title" id="themes-bar-title">Selecciona una categoría</span>
+      </div>
       <div class="themes-wrap">
-        <aside class="themes-sidebar">
+        <aside class="themes-sidebar" id="themes-sidebar">
           <div class="themes-search">
             <input id="themes-search" type="text" placeholder="Buscar tema..."
               oninput="GCP.themes.filter(this.value)">
@@ -208,6 +230,7 @@
 
   function setCat(cat) {
     state.cat = cat;
+    if (window.innerWidth <= 700) closeSidebar();
     document.querySelectorAll('.themes-cat-btn').forEach((b, i) => {
       b.classList.toggle('active', CATS[i].id === cat);
     });
@@ -231,6 +254,22 @@
     } else {
       navigator.clipboard.writeText(text).then(() => GCP.toast('Tema copiado ✓', 'success'));
     }
+  }
+
+  function toggleSidebar() {
+    const sb = document.getElementById('themes-sidebar');
+    const ov = document.getElementById('themes-overlay');
+    if (!sb) return;
+    const isOpen = sb.classList.toggle('mob-open');
+    if (ov) ov.classList.toggle('show', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeSidebar() {
+    const sb = document.getElementById('themes-sidebar');
+    const ov = document.getElementById('themes-overlay');
+    if (sb) sb.classList.remove('mob-open');
+    if (ov) ov.classList.remove('show');
+    document.body.style.overflow = '';
   }
 
   GCP.themes = { openTheme, backToGrid, setCat, filter, copyPrayer, shareTheme };
