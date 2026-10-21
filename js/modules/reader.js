@@ -104,6 +104,27 @@
   const style = document.createElement('style');
   style.textContent = `
     .reader-wrap{display:flex;height:calc(100vh - 56px);}
+    @media(max-width:700px){
+      .reader-sidebar,.chars-sidebar,.sum-sidebar{
+        position:fixed!important;top:56px!important;
+        left:-100%!important;bottom:0!important;
+        width:82vw!important;max-width:290px!important;
+        z-index:300!important;
+        transition:left .25s cubic-bezier(.4,0,.2,1)!important;
+        box-shadow:4px 0 30px rgba(0,0,0,.8)!important;
+        overflow-y:auto!important;
+      }
+      .reader-sidebar.mob-open,.chars-sidebar.mob-open,.sum-sidebar.mob-open{
+        left:0!important;
+      }
+      .reader-main,.chars-main,.sum-main{
+        width:100%!important;padding:14px!important;
+      }
+      .reader-wrap,.chars-wrap,.sum-wrap{
+        flex-direction:column!important;
+        height:auto!important;
+      }
+    }
     .reader-sidebar{width:220px;flex-shrink:0;background:var(--surface);
       border-right:1px solid rgba(212,175,90,.1);overflow-y:auto;padding:12px 0;}
     .reader-filter{display:flex;gap:4px;padding:0 12px 12px;border-bottom:1px solid rgba(212,175,90,.1);}
