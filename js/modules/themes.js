@@ -7,15 +7,15 @@
 
   const CATS = [
     { id: 'all', label: 'Todos', color: '#D4AF5A' },
-    { id: 'emociones', label: 'Emociones', color: '#9b59b6' },
+    { id: 'emocion', label: 'Emociones', color: '#9b59b6' },
     { id: 'relaciones', label: 'Relaciones', color: '#e74c3c' },
-    { id: 'vida-espiritual', label: 'Vida Espiritual', color: '#2980b9' },
+    { id: 'espiritual', label: 'Vida Espiritual', color: '#2980b9' },
     { id: 'vocacion', label: 'Vocación', color: '#27ae60' },
-    { id: 'situaciones-dificiles', label: 'Situaciones Difíciles', color: '#e67e22' },
-    { id: 'salud-mental', label: 'Salud Mental', color: '#1abc9c' },
-    { id: 'fe-y-sociedad', label: 'Fe y Sociedad', color: '#8e44ad' },
+    { id: 'situacion', label: 'Situaciones Difíciles', color: '#e67e22' },
+    { id: 'salud_mental', label: 'Salud Mental', color: '#1abc9c' },
+    { id: 'fe_sociedad', label: 'Fe y Sociedad', color: '#8e44ad' },
     { id: 'juventud', label: 'Juventud', color: '#f39c12' },
-    { id: 'etapas-de-vida', label: 'Etapas de Vida', color: '#16a085' },
+    { id: 'etapas', label: 'Etapas de Vida', color: '#16a085' },
   ];
 
   page.innerHTML = `<div class="loading"><div class="spinner"></div><p>Cargando temas...</p></div>`;
