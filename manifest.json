@@ -1,0 +1,39 @@
+{
+  "name": "Biblia Reina Valera 1960 — Generación con Propósito",
+  "short_name": "Biblia RV1960",
+  "description": "La Palabra de Dios para estudiar, enseñar y compartir. Con IA integrada para aprender más profundo.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0E14",
+  "theme_color": "#D4AF5A",
+  "orientation": "portrait-primary",
+  "lang": "es",
+  "categories": ["education", "lifestyle", "books"],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Leer la Biblia",
+      "url": "/?page=reader",
+      "description": "Leer la Biblia RV1960"
+    },
+    {
+      "name": "Buscar versículo",
+      "url": "/?page=search",
+      "description": "Buscar en la Biblia"
+    }
+  ]
+}
