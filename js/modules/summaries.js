@@ -75,7 +75,7 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .sum-wrap{display:flex;height:calc(100vh - 56px);position:relative;}
+    .sum-wrap{display:flex;height:calc(100vh - 56px);}
     @media(max-width:700px){
       .reader-sidebar,.chars-sidebar,.sum-sidebar{
         position:fixed!important;top:56px!important;
@@ -97,7 +97,7 @@
         height:auto!important;
       }
     }
-    .sum-sidebar{width:230px;flex-shrink:0;background:var(--surface);isolation:isolate;
+    .sum-sidebar{width:230px;flex-shrink:0;background:var(--surface);
       border-right:1px solid rgba(212,175,90,.1);overflow-y:auto;padding:12px 0;}
     .sum-filter{display:flex;gap:4px;padding:0 12px 12px;border-bottom:1px solid rgba(212,175,90,.1);}
     .sum-filter-btn{flex:1;background:none;border:1px solid rgba(212,175,90,.2);
@@ -137,7 +137,6 @@
         <button class="mob-bar-btn" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
         <span class="mob-bar-title" id="sum-bar-title">Selecciona un libro</span>
       </div>
-    <div class="sum-wrap">
       <aside class="sum-sidebar" id="sum-sidebar">
         <div class="sum-filter" style="display:flex;gap:4px;align-items:center;">
           <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
