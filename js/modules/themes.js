@@ -272,7 +272,7 @@
     document.body.style.overflow = '';
   }
 
-  GCP.themes = { openTheme, backToGrid, setCat, filter, copyPrayer, shareTheme };
+  GCP.themes = { openTheme, backToGrid, setCat, filter, copyPrayer, shareTheme, toggleSidebar, closeSidebar };
 
   /* Cargar temas */
   fetch('temas.json')
