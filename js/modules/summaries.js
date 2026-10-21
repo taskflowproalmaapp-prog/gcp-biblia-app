@@ -73,6 +73,34 @@
 
   let state = { testament: 'ALL', active: null };
 
+  
+
+  page.innerHTML = `
+      <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.summaries.closeSidebar()"></div>
+      <div class="mob-bar">
+        <button class="mob-bar-btn" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
+        <span class="mob-bar-title" id="sum-bar-title">Selecciona un libro</span>
+      </div>
+    <div class="sum-wrap">
+      <aside class="sum-sidebar" id="sum-sidebar">
+        <div class="sum-filter" style="display:flex;gap:4px;align-items:center;">
+          <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
+          <button class="sum-filter-btn" onclick="GCP.summaries.setT('AT')">AT</button>
+          <button class="sum-filter-btn" onclick="GCP.summaries.setT('NT')">NT</button>
+          <button id="sum-close-btn" onclick="GCP.summaries.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;margin-left:auto;padding:4px;">✕</button>
+        </div>
+        <div id="sum-list"></div>
+      </aside>
+      <div id="sum-main" class="sum-main">
+        <div class="sum-welcome">
+          <div style="font-size:48px">📚</div>
+          <h2>Resúmenes Bíblicos</h2>
+          <p>Selecciona un libro para ver su análisis completo generado por IA</p>
+        </div>
+      </div>
+    </div>`;
+
+
   const style = document.createElement('style');
   style.textContent = `
     .sum-wrap{display:flex;height:calc(100vh - 56px);}
@@ -130,31 +158,6 @@
     .sum-ai-loading small{font-size:12px;opacity:.7;display:block;margin-top:4px;}
     @media(max-width:600px){.sum-sidebar{width:160px;}.sum-main{padding:16px;}}`;
   document.head.appendChild(style);
-
-  page.innerHTML = `
-      <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.summaries.closeSidebar()"></div>
-      <div class="mob-bar">
-        <button class="mob-bar-btn" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
-        <span class="mob-bar-title" id="sum-bar-title">Selecciona un libro</span>
-      </div>
-      <aside class="sum-sidebar" id="sum-sidebar">
-        <div class="sum-filter" style="display:flex;gap:4px;align-items:center;">
-          <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
-          <button class="sum-filter-btn" onclick="GCP.summaries.setT('AT')">AT</button>
-          <button class="sum-filter-btn" onclick="GCP.summaries.setT('NT')">NT</button>
-          <button id="sum-close-btn" onclick="GCP.summaries.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;margin-left:auto;padding:4px;">✕</button>
-        </div>
-        <div id="sum-list"></div>
-      </aside>
-      <div id="sum-main" class="sum-main">
-        <div class="sum-welcome">
-          <div style="font-size:48px">📚</div>
-          <h2>Resúmenes Bíblicos</h2>
-          <p>Selecciona un libro para ver su análisis completo generado por IA</p>
-        </div>
-      </div>
-    </div>`;
-
   function renderList() {
     const list = document.getElementById('sum-list');
     if (!list) return;
