@@ -276,5 +276,8 @@ Responde SOLO con este JSON válido, sin texto extra:
       GCP.speak.text(texto, 'Resumen de ' + book.name);
     }
   };
+  // Exponer funciones de sidebar
+  const _gcpSumm = GCP.summaries || {};
+  GCP.summaries = Object.assign(_gcpSumm, { toggleSidebar, closeSidebar });
   renderList();
 })();
