@@ -172,7 +172,8 @@
     state.book = id;
     state.chapter = 1;
     renderBookList();
-    await renderChapter();
+    closeSidebar();
+    renderChapter();
   }
 
   async function renderChapter() {
@@ -250,20 +251,16 @@
   function toggleSidebar() {
     const sb = document.getElementById('reader-sidebar');
     const ov = document.getElementById('reader-overlay');
-    const cl = document.getElementById('reader-close-btn');
     if (!sb) return;
     const isOpen = sb.classList.toggle('mob-open');
     if (ov) ov.classList.toggle('show', isOpen);
-    if (cl) cl.style.display = isOpen ? 'block' : 'none';
     document.body.style.overflow = isOpen ? 'hidden' : '';
   }
   function closeSidebar() {
     const sb = document.getElementById('reader-sidebar');
     const ov = document.getElementById('reader-overlay');
-    const cl = document.getElementById('reader-close-btn');
     if (sb) sb.classList.remove('mob-open');
     if (ov) ov.classList.remove('show');
-    if (cl) cl.style.display = 'none';
     document.body.style.overflow = '';
   }
 
