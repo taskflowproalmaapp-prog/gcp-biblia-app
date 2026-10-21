@@ -102,12 +102,10 @@
   document.head.appendChild(style);
 
   page.innerHTML = `
-    <div class="chars-wrap">
-      <!-- Tab lateral para abrir sidebar en móvil -->
+      <!-- Tab lateral FUERA del wrap -->
       <button class="mob-tab" onclick="GCP.personajes.toggleSidebar()">☰ Lista</button>
-      <!-- Overlay -->
       <div class="mob-sidebar-overlay" id="chars-overlay" onclick="GCP.personajes.closeSidebar()"></div>
-
+    <div class="chars-wrap">
       <aside class="chars-sidebar" id="chars-sidebar">
         <div class="chars-search">
           <div style="display:flex;align-items:center;gap:8px;">
