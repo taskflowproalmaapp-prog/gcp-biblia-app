@@ -74,6 +74,9 @@
     .prof-key-text{color:var(--gold);font-size:15px;font-family:Georgia,serif;font-style:italic;line-height:1.6;}
     .prof-note-simple{background:rgba(212,175,90,.05);border-left:4px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:12px;}
     .prof-note-simple-text{color:var(--text2);font-size:13px;line-height:1.7;font-style:italic;}
+    .prof-group-intro{background:rgba(212,175,90,.04);border:1px solid rgba(212,175,90,.1);
+      border-radius:10px;padding:16px 20px;margin-bottom:16px;color:var(--text2);
+      font-size:14px;line-height:1.8;font-style:italic;}
     @media(max-width:600px){
       .prof-theology-grid{grid-template-columns:1fr;}
     }
@@ -132,6 +135,11 @@
       const catObj = DATA.cats.find(c => c.key === cat);
       if (activeCat === 'all') {
         html += `<div class="prof-group-title">${catObj ? catObj.label : cat}</div>`;
+        if (catObj && catObj.intro) {
+          html += `<div class="prof-group-intro">${esc(catObj.intro)}</div>`;
+        }
+      } else if (catObj && catObj.intro) {
+        html += `<div class="prof-group-intro">${esc(catObj.intro)}</div>`;
       }
       groups[cat].forEach((pair, i) => {
         const idx = `${cat}-${i}`;
