@@ -240,6 +240,22 @@ Responde SOLO con este JSON válido, sin texto extra:
     renderList();
   }
 
+    function toggleSidebar() {
+    const sb = document.getElementById('sum-sidebar');
+    const ov = document.getElementById('sum-overlay');
+    if (!sb) return;
+    const isOpen = sb.classList.toggle('mob-open');
+    if (ov) ov.classList.toggle('show', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeSidebar() {
+    const sb = document.getElementById('sum-sidebar');
+    const ov = document.getElementById('sum-overlay');
+    if (sb) sb.classList.remove('mob-open');
+    if (ov) ov.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
   GCP.summaries = {
     open, setT,
     _lastDeep: null,
