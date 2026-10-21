@@ -230,7 +230,7 @@
 
   function setCat(cat) {
     state.cat = cat;
-    if (window.innerWidth <= 700) GCP.closeSidebar();
+    closeSidebar();
     document.querySelectorAll('.themes-cat-btn').forEach((b, i) => {
       b.classList.toggle('active', CATS[i].id === cat);
     });

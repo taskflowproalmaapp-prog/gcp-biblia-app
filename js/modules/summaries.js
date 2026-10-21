@@ -175,6 +175,7 @@
     if (!book) return;
     state.active = id;
     renderList();
+    closeSidebar();
 
     const main = document.getElementById('sum-main');
     main.innerHTML = `
