@@ -510,6 +510,19 @@
       document.body.style.overflow = isOpen ? '' : 'hidden';
     };
 
+    /* Cierra cualquier sidebar de módulo — función global */
+    GCP.closeSidebar = function() {
+      ['sum-sidebar','chars-sidebar','themes-sidebar','reader-sidebar'].forEach(id => {
+        const sb = document.getElementById(id);
+        if (sb) sb.classList.remove('mob-open');
+      });
+      ['sum-overlay','chars-overlay','themes-overlay','reader-overlay'].forEach(id => {
+        const ov = document.getElementById(id);
+        if (ov) ov.classList.remove('show');
+      });
+      document.body.style.overflow = '';
+    };
+
     /* ── Sidebar móvil universal ── */
     GCP.mobileSidebar = {
       init(sidebarSel, triggerEl) {
