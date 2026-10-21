@@ -111,9 +111,9 @@
   document.head.appendChild(style);
 
   page.innerHTML = `
-    <div class="sum-wrap">
       <button class="mob-tab" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
       <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.summaries.closeSidebar()"></div>
+    <div class="sum-wrap">
       <aside class="sum-sidebar" id="sum-sidebar">
         <div class="sum-filter" style="display:flex;gap:4px;align-items:center;">
           <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
