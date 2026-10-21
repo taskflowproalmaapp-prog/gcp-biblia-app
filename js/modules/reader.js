@@ -77,8 +77,11 @@
 
   /* Render inicial */
   page.innerHTML = `
-      <button class="mob-tab" onclick="GCP.reader.toggleSidebar()">☰ Libros</button>
       <div class="mob-sidebar-overlay" id="reader-overlay" onclick="GCP.reader.closeSidebar()"></div>
+      <div class="mob-bar">
+        <button class="mob-bar-btn" onclick="GCP.reader.toggleSidebar()">☰ Libros</button>
+        <span class="mob-bar-title" id="reader-bar-title">Selecciona un libro</span>
+      </div>
     <div class="reader-wrap">
       <aside class="reader-sidebar" id="reader-sidebar">
         <div class="reader-filter">
