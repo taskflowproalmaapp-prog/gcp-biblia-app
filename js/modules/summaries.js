@@ -278,8 +278,5 @@ Responde SOLO con este JSON válido, sin texto extra:
       GCP.speak.text(texto, 'Resumen de ' + book.name);
     }
   };
-  // Agregar sidebar al objeto ya existente
-  GCP.summaries.toggleSidebar = toggleSidebar;
-  GCP.summaries.closeSidebar = closeSidebar;
   renderList();
 })();
