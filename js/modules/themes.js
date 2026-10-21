@@ -96,7 +96,7 @@
 
   function renderShell() {
     page.innerHTML = `
-      <div class="mob-sidebar-overlay" id="themes-overlay" onclick="GCP.closeSidebar()"></div>
+      <div class="mob-sidebar-overlay" id="themes-overlay" onclick="GCP.themes.closeSidebar()"></div>
       <div class="mob-bar">
         <button class="mob-bar-btn" onclick="GCP.themes.toggleSidebar()">☰ Temas</button>
         <span class="mob-bar-title" id="themes-bar-title">Selecciona una categoría</span>
