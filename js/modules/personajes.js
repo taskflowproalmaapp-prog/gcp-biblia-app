@@ -375,20 +375,16 @@
   function toggleSidebar() {
     const sb = document.getElementById('chars-sidebar');
     const ov = document.getElementById('chars-overlay');
-    const cl = document.getElementById('chars-close-btn');
     if (!sb) return;
     const isOpen = sb.classList.toggle('mob-open');
     if (ov) ov.classList.toggle('show', isOpen);
-    if (cl) cl.style.display = isOpen ? 'block' : 'none';
     document.body.style.overflow = isOpen ? 'hidden' : '';
   }
   function closeSidebar() {
     const sb = document.getElementById('chars-sidebar');
     const ov = document.getElementById('chars-overlay');
-    const cl = document.getElementById('chars-close-btn');
     if (sb) sb.classList.remove('mob-open');
     if (ov) ov.classList.remove('show');
-    if (cl) cl.style.display = 'none';
     document.body.style.overflow = '';
   }
   // Al abrir un personaje en móvil, cerrar sidebar
