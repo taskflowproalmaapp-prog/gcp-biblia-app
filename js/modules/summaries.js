@@ -112,11 +112,14 @@
 
   page.innerHTML = `
     <div class="sum-wrap">
-      <aside class="sum-sidebar">
-        <div class="sum-filter">
+      <button class="mob-tab" onclick="GCP.summaries.toggleSidebar()">☰ Libros</button>
+      <div class="mob-sidebar-overlay" id="sum-overlay" onclick="GCP.summaries.closeSidebar()"></div>
+      <aside class="sum-sidebar" id="sum-sidebar">
+        <div class="sum-filter" style="display:flex;gap:4px;align-items:center;">
           <button class="sum-filter-btn active" onclick="GCP.summaries.setT('ALL')">Todos</button>
           <button class="sum-filter-btn" onclick="GCP.summaries.setT('AT')">AT</button>
           <button class="sum-filter-btn" onclick="GCP.summaries.setT('NT')">NT</button>
+          <button id="sum-close-btn" onclick="GCP.summaries.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:18px;cursor:pointer;margin-left:auto;padding:4px;">✕</button>
         </div>
         <div id="sum-list"></div>
       </aside>
@@ -163,16 +166,17 @@
       </div>`;
     main.scrollTop = 0;
 
-    // Cargar desde archivo pre-generado (instantáneo, sin IA)
-    if (!window._SUMMARIES_DATA) {
-      try {
-        const resp = await fetch('summaries.json');
-        window._SUMMARIES_DATA = await resp.json();
-      } catch(e) {
-        window._SUMMARIES_DATA = {};
-      }
-    }
-    const deep = window._SUMMARIES_DATA[id] || null;
+    const cached = GCP.ai.cache.get('sum_' + id);
+    const deep = cached || await GCP.ai.askJSON(
+      `Eres experto en Biblia Reina Valera 1960. Analiza el libro de ${book.name}.
+Responde SOLO con este JSON válido, sin texto extra:
+{"whatHappens":"qué ocurre (3-4 oraciones)","context":"contexto histórico (2-3 oraciones)",
+"godPurpose":"propósito de Dios (2-3 oraciones)","practicalLessons":"3 lecciones prácticas hoy",
+"christConnection":"conexión con Cristo (2-3 oraciones)",
+"keyVerses":[{"ref":"Libro cap:vers","text":"versículo exacto RV1960"},{"ref":"Libro cap:vers","text":"versículo exacto RV1960"},{"ref":"Libro cap:vers","text":"versículo exacto RV1960"}],
+"curiosities":["dato curioso 1","dato curioso 2","dato curioso 3"]}`, 1000);
+
+    if (!cached && deep) GCP.ai.cache.set('sum_' + id, deep);
 
     if (!deep) {
       main.querySelector('.sum-ai-loading').innerHTML = '<p style="color:#e57373">⚠️ Error al generar. Intenta de nuevo.</p>';
@@ -198,17 +202,12 @@
         ${deep.curiosities.map(c=>`<div class="sum-curiosity">✦ ${c}</div>`).join('')}</div>` : ''}
       <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
         <button class="theme-btn theme-btn-primary" onclick="GCP.router.go('reader')">📖 Leer ${book.name}</button>
-        <button class="theme-btn" onclick="GCP.speak.text(
-          '${book.name}. ' +
-          (deep.whatHappens||'') + '. ' +
-          (deep.context||'') + '. ' +
-          (deep.godPurpose||'') + '. ' +
-          (deep.practicalLessons||'') + '. ' +
-          (deep.christConnection||''),
-          'Resumen de ${book.name}')">
+        <button class="theme-btn" id="sum-listen-btn" onclick="GCP.summaries.listen()">
           🔊 Escuchar resumen
         </button>
       </div>`;
+  GCP.summaries._lastDeep = deep;
+  GCP.summaries._lastBook = book;
   }
 
   function setT(t) {
@@ -217,6 +216,25 @@
     renderList();
   }
 
-  GCP.summaries = { open, setT };
+  GCP.summaries = {
+    open, setT,
+    _lastDeep: null,
+    _lastBook: null,
+    listen() {
+      const deep = GCP.summaries._lastDeep;
+      const book = GCP.summaries._lastBook;
+      if (!deep || !book) { GCP.toast('Primero abre un libro'); return; }
+      const texto = [
+        book.name + '.',
+        deep.whatHappens || '',
+        deep.context || '',
+        deep.godPurpose || '',
+        deep.practicalLessons || '',
+        deep.christConnection || '',
+        (deep.keyVerses || []).map(v => v.ref + ': ' + v.text).join('. ')
+      ].filter(Boolean).join(' ');
+      GCP.speak.text(texto, 'Resumen de ' + book.name);
+    }
+  };
   renderList();
 })();
