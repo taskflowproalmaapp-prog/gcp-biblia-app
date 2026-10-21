@@ -103,9 +103,17 @@
 
   page.innerHTML = `
     <div class="chars-wrap">
-      <aside class="chars-sidebar">
+      <!-- Tab lateral para abrir sidebar en móvil -->
+      <button class="mob-tab" onclick="GCP.personajes.toggleSidebar()">☰ Lista</button>
+      <!-- Overlay -->
+      <div class="mob-sidebar-overlay" id="chars-overlay" onclick="GCP.personajes.closeSidebar()"></div>
+
+      <aside class="chars-sidebar" id="chars-sidebar">
         <div class="chars-search">
-          <input id="chars-search" type="text" placeholder="Buscar personaje..." oninput="GCP.personajes.search(this.value)">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input id="chars-search" type="text" placeholder="Buscar personaje..." oninput="GCP.personajes.search(this.value)" style="flex:1">
+            <button onclick="GCP.personajes.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;" id="chars-close-btn">✕</button>
+          </div>
         </div>
         <div class="chars-tabs">
           <button class="chars-tab active" onclick="GCP.personajes.tab('ALL',this)">Todos</button>
@@ -343,7 +351,33 @@
     }
   }
 
-  GCP.personajes = { open, search, tab, goToVerse, goToChapter, readChapters };
+  function toggleSidebar() {
+    const sb = document.getElementById('chars-sidebar');
+    const ov = document.getElementById('chars-overlay');
+    const cl = document.getElementById('chars-close-btn');
+    if (!sb) return;
+    const isOpen = sb.classList.toggle('mob-open');
+    if (ov) ov.classList.toggle('show', isOpen);
+    if (cl) cl.style.display = isOpen ? 'block' : 'none';
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+  function closeSidebar() {
+    const sb = document.getElementById('chars-sidebar');
+    const ov = document.getElementById('chars-overlay');
+    const cl = document.getElementById('chars-close-btn');
+    if (sb) sb.classList.remove('mob-open');
+    if (ov) ov.classList.remove('show');
+    if (cl) cl.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  // Al abrir un personaje en móvil, cerrar sidebar
+  const _origOpen = open;
+  function openAndClose(id) {
+    _origOpen(id);
+    if (window.innerWidth <= 700) closeSidebar();
+  }
+
+  GCP.personajes = { open: openAndClose, search, tab, goToVerse, goToChapter, readChapters, toggleSidebar, closeSidebar };
 
   fetch('personajes.json').then(r => r.json()).then(d => {
     DATA = d;
