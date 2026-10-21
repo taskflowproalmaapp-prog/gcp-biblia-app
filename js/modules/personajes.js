@@ -123,7 +123,7 @@
   document.head.appendChild(style);
 
   page.innerHTML = `
-      <div class="mob-sidebar-overlay" id="chars-overlay" onclick="GCP.closeSidebar()"></div>
+      <div class="mob-sidebar-overlay" id="chars-overlay" onclick="GCP.personajes.closeSidebar()"></div>
       <div class="mob-bar">
         <button class="mob-bar-btn" onclick="GCP.personajes.toggleSidebar()">☰ Personajes</button>
         <span class="mob-bar-title" id="chars-bar-title">Selecciona un personaje</span>
@@ -133,7 +133,7 @@
         <div class="chars-search">
           <div style="display:flex;align-items:center;gap:8px;">
             <input id="chars-search" type="text" placeholder="Buscar personaje..." oninput="GCP.personajes.search(this.value)" style="flex:1">
-            <button onclick="GCP.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;" id="chars-close-btn">✕</button>
+            <button onclick="GCP.personajes.closeSidebar()" style="display:none;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;flex-shrink:0;" id="chars-close-btn">✕</button>
           </div>
         </div>
         <div class="chars-tabs">
