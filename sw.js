@@ -1,4 +1,8 @@
-const CACHE = 'biblia-gcp-v1';
+/* Service worker — Biblia GCP
+   - HTML, JSON y JS: primero red (siempre lo más nuevo); si no hay conexión, usa la copia guardada.
+   - Imágenes y audio: primero caché (no cambian casi nunca).
+   Subir el número de CACHE borra las copias viejas en todos los dispositivos. */
+const CACHE = 'biblia-gcp-v2';
 const STATIC = [
   '/',
   '/index.html',
@@ -15,7 +19,9 @@ const STATIC = [
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => Promise.all(STATIC.map(u => c.add(new Request(u, { cache: 'reload' })).catch(() => {}))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -27,21 +33,48 @@ self.addEventListener('activate', e => {
   );
 });
 
-self.addEventListener('fetch', e => {
-  // Solo cachear GET
-  if (e.request.method !== 'GET') return;
-  // No cachear funciones de Netlify
-  if (e.request.url.includes('/.netlify/')) return;
+/* Clave de caché sin ?v=...&cb=... para no acumular una copia por cada carga */
+function cacheKey(req) {
+  const url = new URL(req.url);
+  url.search = '';
+  return url.toString();
+}
 
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200) return res;
-        const clone = res.clone();
-        caches.open(CACHE).then(c => c.put(e.request, clone));
+function isFresh(req, url) {
+  return req.mode === 'navigate' || /\.(html|json|js)$/.test(url.pathname) || url.pathname === '/';
+}
+
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;      // CDNs y externos: sin tocar
+  if (url.pathname.startsWith('/.netlify/')) return;    // funciones (IA): sin caché
+
+  if (isFresh(req, url)) {
+    // Red primero, revalidando con el servidor; copia guardada solo sin conexión
+    e.respondWith(
+      fetch(req, { cache: 'no-cache' }).then(res => {
+        if (res && res.status === 200) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(cacheKey(req), clone));
+        }
         return res;
-      }).catch(() => cached);
-    })
+      }).catch(() =>
+        caches.match(cacheKey(req)).then(c => c || caches.match('/index.html'))
+      )
+    );
+    return;
+  }
+
+  // Imágenes, audio y demás: caché primero
+  e.respondWith(
+    caches.match(cacheKey(req)).then(cached => cached || fetch(req).then(res => {
+      if (res && res.status === 200) {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(cacheKey(req), clone));
+      }
+      return res;
+    }))
   );
 });
